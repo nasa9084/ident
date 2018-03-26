@@ -14,5 +14,9 @@ before_install:
 install:
   - $GOPATH/bin/dep ensure
 
+before_script:
+  - make keygen
+  - make initdb
+
 script:
   - make test
