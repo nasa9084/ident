@@ -118,6 +118,7 @@ func testAuthByTOTPValidate(t *testing.T) {
 		hasErr  bool
 	}{
 		{input.AuthByTOTPRequest{UserID: "foo", Token: "000000"}, false},
+		{input.AuthByTOTPRequest{UserID: "foo", Token: "abcdef"}, true},
 		{input.AuthByTOTPRequest{UserID: "foo", Token: "1"}, true},
 		{input.AuthByTOTPRequest{UserID: "foo"}, true},
 		{input.AuthByTOTPRequest{Token: "000000"}, true},
