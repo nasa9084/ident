@@ -11,6 +11,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/nasa9084/ident/entity"
+	"github.com/nasa9084/ident/util"
 )
 
 type UserRepository struct {
@@ -58,13 +59,11 @@ func (repo *UserRepository) CreateUser(ctx context.Context, userid, password str
 	secretbytes := sha512.Sum512([]byte(uuid.New().String()))
 	secret := hex.EncodeToString(secretbytes[:])
 
-	for i := 0; i < 30; i++ {
-		h := sha512.Sum512([]byte(password + userid))
-		password = hex.EncodeToString(h[:])
-	}
-
 	repo.KVS.Send("MULTI")
-	repo.KVS.Send("HMSET", "user:"+userid, "password", password, "totp_secret", secret)
+	repo.KVS.Send("HMSET", "user:"+userid,
+		"password", util.Hash(password, userid),
+		"totp_secret", secret,
+	)
 	repo.KVS.Send("EXPIRE", "user:"+userid, 60*10)
 	sessid := uuid.New().String()
 	repo.KVS.Send("SET", "session:"+sessid, userid, "EX", 60*10)

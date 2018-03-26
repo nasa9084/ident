@@ -15,6 +15,10 @@ var (
 	userKVS redis.Conn
 )
 
+const (
+	aliceID = "alice"
+)
+
 func TestUserRepository(t *testing.T) {
 	var err error
 	userRDB, err = sql.Open("mysql", "root@tcp(127.0.0.1:3306)/ident")
@@ -34,7 +38,7 @@ func testIsUserExists(t *testing.T) {
 		RDB: userRDB,
 		KVS: userKVS,
 	}
-	exists, err := repo.IsUserExists(context.Background(), "foo")
+	exists, err := repo.IsUserExists(context.Background(), aliceID)
 	if err != nil {
 		t.Error(err)
 		return
