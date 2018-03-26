@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"net/http"
+	"os"
 	"testing"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -23,7 +24,7 @@ func getEnv(t *testing.T) *infra.Environment {
 	if err != nil {
 		t.Fatal(err)
 	}
-	key, err := infra.LoadPrivateKey("/Users/nasa/.ssh/id_ecdsa")
+	key, err := infra.LoadPrivateKey(os.Getenv("TEST_KEYPATH"))
 	if err != nil {
 		t.Fatal(err)
 	}
