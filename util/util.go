@@ -23,3 +23,9 @@ func Hash(password, salt string) string {
 
 	return buf.String()
 }
+
+// SHA512Digest hashes using SHA512 and returns its hex digest.
+func SHA512Digest(s string) string {
+	h := sha512.Sum512([]byte(s))
+	return hex.EncodeToString(h[:])
+}

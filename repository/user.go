@@ -2,9 +2,7 @@ package repository
 
 import (
 	"context"
-	"crypto/sha512"
 	"database/sql"
-	"encoding/hex"
 	"errors"
 	"strconv"
 
@@ -56,8 +54,8 @@ func (repo *UserRepository) CreateUser(ctx context.Context, userid, password str
 	if exists {
 		return "", ErrUserExists
 	}
-	secretbytes := sha512.Sum512([]byte(uuid.New().String()))
-	secret := hex.EncodeToString(secretbytes[:])
+
+	secret := util.SHA512Digest(uuid.New().String())
 
 	repo.KVS.Send("MULTI")
 	repo.KVS.Send("HMSET", "user:"+userid,
