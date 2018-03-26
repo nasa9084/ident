@@ -138,11 +138,8 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 		resp.Status = statusFromError(err)
 		return resp
 	}
-	if _, err := env.Mail.Send(infra.NewVerificationMail(u.Email, sessid)); err != nil {
-		resp.Err = err
-		resp.Status = http.StatusInternalServerError
-		return resp
-	}
+	resp.Email = u.Email
+	resp.SessionID = sessid
 	resp.Status = http.StatusOK
 	return resp
 }

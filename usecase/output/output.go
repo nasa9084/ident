@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/lestrrat-go/bufferpool"
+	"github.com/nasa9084/ident/infra"
+	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 type Response interface {
@@ -109,11 +111,21 @@ func (resp VerifyTOTPResponse) Render(w http.ResponseWriter) {
 type UpdateEmailResponse struct {
 	Status int
 	Err    error
+
+	Mail      sendgrid.Client
+	Email     string
+	SessionID string
 }
 
 func (resp UpdateEmailResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
+		return
+	}
+
+	_, err := resp.Mail.Send(infra.NewVerificationMail(resp.Email, resp.SessionID))
+	if err != nil {
+		renderJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 	renderJSON(w, resp.Status, map[string]string{"status": "ok"})
