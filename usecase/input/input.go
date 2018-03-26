@@ -2,6 +2,7 @@ package input
 
 import (
 	"errors"
+	"unicode"
 )
 
 type Request interface {
@@ -126,6 +127,11 @@ func (r AuthByTOTPRequest) Validate() error {
 		return errors.New("token is required")
 	case len(r.Token) != 6:
 		return errors.New("token length invalid")
+	}
+	for _, r := range r.Token {
+		if !unicode.IsDigit(r) {
+			return errors.New("token must be digit")
+		}
 	}
 	return nil
 }
