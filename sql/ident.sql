@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE IF NOT EXISTS users (
-        user_id VARCHAR(256) NOT NULL,
+        user_id VARCHAR(128) NOT NULL,
         password VARCHAR(512) NOT NULL,
         totp_secret VARCHAR(512) NOT NULL,
         email VARCHAR(256) NOT NULL,
