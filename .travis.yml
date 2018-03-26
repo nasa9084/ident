@@ -4,6 +4,10 @@ go:
   - 1.9.x
   - 1.10.x
 
+service:
+  - redis-server
+  - mysql
+
 before_install:
   - go get github.com/golang/dep/...
 
