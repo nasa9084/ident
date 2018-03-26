@@ -3,9 +3,6 @@ keygen:
 	@mkdir key
 	@go run internal/cmd/keygen/keygen.go
 
-generate:
-	@echo "generate handlers..."
-
 initdb:
 	@echo "drop database"
 	@mysql -uroot -e 'DROP DATABASE IF EXISTS ident;'
