@@ -19,6 +19,14 @@ type jsonErr struct {
 }
 
 func renderJSON(w http.ResponseWriter, status int, v interface{}) {
+	if v == nil {
+		je := jsonErr{
+			Message: "nil response",
+			Error:   http.StatusText(http.StatusInternalServerError),
+		}
+		renderJSON(w, status, je)
+		return
+	}
 	if err, ok := v.(error); ok {
 		je := jsonErr{
 			Message: err.Error(),
