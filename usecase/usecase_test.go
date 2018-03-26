@@ -42,7 +42,7 @@ const (
 	aliceID      = "alice"
 )
 
-func TestUserCRUD(t *testing.T) {
+func TestUserCreationProcess(t *testing.T) {
 	env := getEnv(t)
 
 	// before create alice
