@@ -12,3 +12,6 @@ initdb:
 	@echo "create database"
 	@mysql -uroot -e 'CREATE DATABASE ident;'
 	@mysql -uroot ident < sql/ident.sql
+
+test:
+	@go test -v ./...
