@@ -58,6 +58,15 @@ func renderPNG(w http.ResponseWriter, status int, png []byte) {
 	w.Write(png)
 }
 
+func renderJSONWithSessionID(w http.ResponseWriter, status int, err error, sessid string) {
+	if err != nil {
+		renderJSON(w, status, err)
+		return
+	}
+	w.Header().Set("X-SESSION-ID", sessid)
+	renderJSON(w, status, map[string]string{"message": "ok"})
+}
+
 type IsUserExistsResponse struct {
 	Status int
 	Err    error
@@ -81,12 +90,7 @@ type CreateUserResponse struct {
 }
 
 func (resp CreateUserResponse) Render(w http.ResponseWriter) {
-	if resp.Err != nil {
-		renderJSON(w, resp.Status, resp.Err)
-		return
-	}
-	w.Header().Set("X-SESSION-ID", resp.SessionID)
-	renderJSON(w, resp.Status, map[string]string{"message": "ok"})
+	renderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)
 }
 
 type TOTPQRCodeResponse struct {
@@ -160,13 +164,7 @@ type AuthByTOTPResponse struct {
 }
 
 func (resp AuthByTOTPResponse) Render(w http.ResponseWriter) {
-	if resp.Err != nil {
-		renderJSON(w, resp.Status, resp.Err)
-		return
-	}
-
-	w.Header().Set("X-SESSION-ID", resp.SessionID)
-	renderJSON(w, resp.Status, map[string]string{"status": "ok"})
+	renderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)
 }
 
 type AuthByPasswordResponse struct {
