@@ -55,6 +55,19 @@ func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg R
 		PrivateKey: key,
 	}
 	router := mux.NewRouter()
+	bindRoutes(router, env)
+
+	s := &Server{
+		server: &http.Server{
+			Addr:    addr,
+			Handler: router,
+		},
+		closed: make(chan struct{}),
+	}
+	return s, nil
+}
+
+func bindRoutes(router *mux.Router, env *infra.Environment) {
 	router.NotFoundHandler = http.HandlerFunc(NotFoundHandler)
 	router.MethodNotAllowedHandler = http.HandlerFunc(MethodNotAllowedHandler)
 	v1 := router.PathPrefix(`/v1`).Subrouter()
@@ -66,15 +79,6 @@ func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg R
 	v1.HandleFunc(`/auth/totp`, AuthByTOTPHandler(env)).Methods(http.MethodPost)
 	v1.HandleFunc(`/auth/password`, AuthByPasswordHandler(env)).Methods(http.MethodPost)
 	v1.HandleFunc(`/publickey`, GetPublicKeyHandler(env)).Methods(http.MethodGet)
-
-	s := &Server{
-		server: &http.Server{
-			Addr:    addr,
-			Handler: router,
-		},
-		closed: make(chan struct{}),
-	}
-	return s, nil
 }
 
 // Run the server.
