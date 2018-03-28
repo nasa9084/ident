@@ -13,7 +13,7 @@ func checkValidate(t *testing.T, r input.Request, hasErr bool) {
 			t.Error(err)
 			return
 		}
-		t.Error("error should be occured, but not")
+		t.Error("error should be occurred, but not")
 		return
 	}
 }

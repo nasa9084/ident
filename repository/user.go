@@ -20,7 +20,7 @@ type UserRepository struct {
 
 // IsUserExists returns whether given user ID has been used or not.
 // When the user ID has been used, this function returns true, otherwise false.
-// This function returns error when some error is occured on connect to databases.
+// This function returns error when some error is occurred on connect to databases.
 func (repo *UserRepository) IsUserExists(ctx context.Context, userid string) (bool, error) {
 	// redis::EXISTS returns 1 if the key exists, otherwise returns 0
 	res, err := redis.Int(repo.KVS.Do("EXISTS", "user:"+userid))
