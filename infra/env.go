@@ -17,6 +17,7 @@ type Environment struct {
 	PrivateKey *ecdsa.PrivateKey
 }
 
+// GetUserRepository generates UserRepository instance fron env itself.
 func (env Environment) GetUserRepository() repository.UserRepository {
 	return repository.UserRepository{
 		RDB: env.RDB,

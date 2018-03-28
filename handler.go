@@ -48,6 +48,7 @@ func renderErr(w http.ResponseWriter, err error) {
 	buf.WriteTo(w)
 }
 
+// NotFoundHandler is a HTTP handler for 404 Not Found.
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
@@ -62,6 +63,7 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	buf.WriteTo(w)
 }
 
+// MethodNotAllowedHandler is a HTTP handler for 405 Method Not Allowed.
 func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
@@ -76,6 +78,7 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	buf.WriteTo(w)
 }
 
+// CreateUserHandler creates a new user.
 func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.CreateUserRequest
@@ -87,6 +90,7 @@ func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// TOTPQRCodeHandler returns TOTP URI QRcode.
 func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.TOTPQRCodeRequest
@@ -98,6 +102,7 @@ func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// VerifyTOTPHandler verifies TOTP is successfully configured.
 func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.VerifyTOTPRequest
@@ -109,6 +114,7 @@ func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// UpdateEmailHandler updates user email.
 func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.UpdateEmailRequest
@@ -120,6 +126,7 @@ func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// VerifyEmailHandler verifies the user's email is valid.
 func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.VerifyEmailRequest
@@ -131,6 +138,8 @@ func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// AuthByTOTPHandler authenticates with user ID and TOTP Token.
+// This handler returns session ID if the authentication is passed.
 func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.AuthByTOTPRequest
@@ -142,6 +151,7 @@ func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// AuthByPasswordHandler authenticates with session ID and Password.
 func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.AuthByPasswordRequest
@@ -153,6 +163,8 @@ func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
+// GetPublicKeyHandler returns ECDSA public key generated from private key
+// for signing JWT token.
 func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		usecase.GetPublicKey(r.Context(), env).Render(w)

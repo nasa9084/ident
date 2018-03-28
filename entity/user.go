@@ -1,5 +1,6 @@
 package entity
 
+// User entity object.
 type User struct {
 	ID         string
 	Password   string

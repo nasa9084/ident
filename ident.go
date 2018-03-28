@@ -18,6 +18,8 @@ type Server struct {
 	closed chan struct{}
 }
 
+// MySQLConfig holds configurations for connect to MySQL server.
+// This struct can also be used for go-flags.
 type MySQLConfig struct {
 	Addr     string `long:"mysql-addr" env:"MYSQL_ADDR" value-name:"MYSQL_ADDR" default:"127.0.0.1:3306"`
 	User     string `long:"mysql-user" env:"MYSQL_USER" value-name:"MYSQL_USER" default:"root"`
@@ -25,10 +27,14 @@ type MySQLConfig struct {
 	DBName   string `long:"mysql-db" env:"MYSQL_DB" value-name:"MYSQL_DB" default:"ident"`
 }
 
+// RedisConfig holds configurations for connect to Redis server.
+// This struct can also be used for go-flags.
 type RedisConfig struct {
 	Addr string `long:"redis-addr" env:"REDIS_ADDR" value-name:"REDIS_ADDR" default:"127.0.0.1:6379"`
 }
 
+// MailConfig holds configuration to use to sendgrid API.
+// This struct can also be used for go-flags.
 type MailConfig struct {
 	APIKey string `long:"sg-apikey" env:"SENDGRID_APIKEY" value-name:"SENDGRID_APIKEY" required:"yes"`
 }

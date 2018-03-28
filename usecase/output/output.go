@@ -9,6 +9,7 @@ import (
 	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
+// Response interface renders into http response.
 type Response interface {
 	Render(http.ResponseWriter)
 }
@@ -67,6 +68,7 @@ func renderJSONWithSessionID(w http.ResponseWriter, status int, err error, sessi
 	renderJSON(w, status, map[string]string{"message": "ok"})
 }
 
+// IsUserExistsResponse is output type for IsUserExists.
 type IsUserExistsResponse struct {
 	Status int
 	Err    error
@@ -74,6 +76,7 @@ type IsUserExistsResponse struct {
 	Exists bool
 }
 
+// Render implements Response interface.
 func (resp IsUserExistsResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
@@ -82,6 +85,7 @@ func (resp IsUserExistsResponse) Render(w http.ResponseWriter) {
 	renderJSON(w, resp.Status, map[string]bool{"status": resp.Exists})
 }
 
+// CreateUserResponse is output type for CreateUser.
 type CreateUserResponse struct {
 	Status int
 	Err    error
@@ -89,16 +93,19 @@ type CreateUserResponse struct {
 	SessionID string
 }
 
+// Render implements Response interface.
 func (resp CreateUserResponse) Render(w http.ResponseWriter) {
 	renderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)
 }
 
+// TOTPQRCodeResponse is output type for TOTPQRCode.
 type TOTPQRCodeResponse struct {
 	Status int
 	Err    error
 	QRCode []byte
 }
 
+// Render implements Response interface.
 func (resp TOTPQRCodeResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
@@ -107,11 +114,13 @@ func (resp TOTPQRCodeResponse) Render(w http.ResponseWriter) {
 	renderPNG(w, resp.Status, resp.QRCode)
 }
 
+// VerifyTOTPResponse is output type for VerifyTOTP.
 type VerifyTOTPResponse struct {
 	Status int
 	Err    error
 }
 
+// Render implements Response interface.
 func (resp VerifyTOTPResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
@@ -120,6 +129,7 @@ func (resp VerifyTOTPResponse) Render(w http.ResponseWriter) {
 	renderJSON(w, resp.Status, map[string]string{"status": "ok"})
 }
 
+// UpdateEmailResponse is output type for UpdateEmail.
 type UpdateEmailResponse struct {
 	Status int
 	Err    error
@@ -129,6 +139,7 @@ type UpdateEmailResponse struct {
 	SessionID string
 }
 
+// Render implements Response interface.
 func (resp UpdateEmailResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
@@ -143,11 +154,13 @@ func (resp UpdateEmailResponse) Render(w http.ResponseWriter) {
 	renderJSON(w, resp.Status, map[string]string{"status": "ok"})
 }
 
+// VerifyEmailResponse is output type for VerifyEmail.
 type VerifyEmailResponse struct {
 	Status int
 	Err    error
 }
 
+// Render implements Response interface.
 func (resp VerifyEmailResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
@@ -156,6 +169,7 @@ func (resp VerifyEmailResponse) Render(w http.ResponseWriter) {
 	renderJSON(w, resp.Status, map[string]string{"status": "ok"})
 }
 
+// AuthByTOTPResponse is output type for AuthByTOTP.
 type AuthByTOTPResponse struct {
 	Status int
 	Err    error
@@ -163,10 +177,12 @@ type AuthByTOTPResponse struct {
 	SessionID string
 }
 
+// Render implements Response interface
 func (resp AuthByTOTPResponse) Render(w http.ResponseWriter) {
 	renderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)
 }
 
+// AuthByPasswordResponse is output type for AuthByPassword.
 type AuthByPasswordResponse struct {
 	Status int
 	Err    error
@@ -174,6 +190,7 @@ type AuthByPasswordResponse struct {
 	Token string
 }
 
+// Render implements Response interface
 func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)
@@ -183,6 +200,7 @@ func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
 	renderJSON(w, resp.Status, map[string]string{"token": resp.Token})
 }
 
+// GetPublicKeyResponse is output type fr GetPublicKey.
 type GetPublicKeyResponse struct {
 	Status int
 	Err    error
@@ -190,6 +208,7 @@ type GetPublicKeyResponse struct {
 	PublicKeyPEM []byte
 }
 
+// Render implements Response interface
 func (resp GetPublicKeyResponse) Render(w http.ResponseWriter) {
 	if resp.Err != nil {
 		renderJSON(w, resp.Status, resp.Err)

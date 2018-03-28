@@ -33,6 +33,7 @@ func statusFromError(err error) int {
 	return http.StatusBadRequest
 }
 
+// IsUserExists returns given user id has been used or not.
 func IsUserExists(ctx context.Context, req input.IsUserExistsRequest, env *infra.Environment) output.Response {
 	var resp output.IsUserExistsResponse
 
@@ -48,6 +49,7 @@ func IsUserExists(ctx context.Context, req input.IsUserExistsRequest, env *infra
 	return resp
 }
 
+// CreateUser creates a new user.
 func CreateUser(ctx context.Context, req input.CreateUserRequest, env *infra.Environment) output.Response {
 	var resp output.CreateUserResponse
 
@@ -63,6 +65,7 @@ func CreateUser(ctx context.Context, req input.CreateUserRequest, env *infra.Env
 	return resp
 }
 
+// GetTOTPQRCode returns a QR code including TOTP URI associated to given user.
 func GetTOTPQRCode(ctx context.Context, req input.TOTPQRCodeRequest, env *infra.Environment) output.Response {
 	var resp output.TOTPQRCodeResponse
 
@@ -85,6 +88,7 @@ func GetTOTPQRCode(ctx context.Context, req input.TOTPQRCodeRequest, env *infra.
 	return resp
 }
 
+// VerifyTOTP verifies the TOTP configuration is successfully done.
 func VerifyTOTP(ctx context.Context, req input.VerifyTOTPRequest, env *infra.Environment) output.Response {
 	var resp output.VerifyTOTPResponse
 
@@ -111,6 +115,7 @@ func VerifyTOTP(ctx context.Context, req input.VerifyTOTPRequest, env *infra.Env
 	return resp
 }
 
+// UpdateEmail updates email for the user.
 func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.Environment) output.Response {
 	var resp output.UpdateEmailResponse
 
@@ -144,6 +149,7 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 	return resp
 }
 
+// VerifyEmail verifies the email is valid.
 func VerifyEmail(ctx context.Context, req input.VerifyEmailRequest, env *infra.Environment) output.Response {
 	var resp output.VerifyEmailResponse
 	repo := env.GetUserRepository()
@@ -163,6 +169,8 @@ func VerifyEmail(ctx context.Context, req input.VerifyEmailRequest, env *infra.E
 	return resp
 }
 
+// AuthByTOTP authenticates using user ID and TOTP token.
+// And returns SessionID.
 func AuthByTOTP(ctx context.Context, req input.AuthByTOTPRequest, env *infra.Environment) output.Response {
 	var resp output.AuthByTOTPResponse
 	repo := env.GetUserRepository()
@@ -191,6 +199,8 @@ func AuthByTOTP(ctx context.Context, req input.AuthByTOTPRequest, env *infra.Env
 	return resp
 }
 
+// AuthByPassword authenticates using password and session ID.
+// Returns JWT Token.
 func AuthByPassword(ctx context.Context, req input.AuthByPasswordRequest, env *infra.Environment) output.Response {
 	var resp output.AuthByPasswordResponse
 	repo := env.GetUserRepository()
@@ -228,6 +238,7 @@ func AuthByPassword(ctx context.Context, req input.AuthByPasswordRequest, env *i
 	return resp
 }
 
+// GetPublicKey returns ECDSA public key.
 func GetPublicKey(ctx context.Context, env *infra.Environment) output.Response {
 	var resp output.GetPublicKeyResponse
 	pubKey := env.PrivateKey.Public()
