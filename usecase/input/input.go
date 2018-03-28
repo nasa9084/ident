@@ -41,7 +41,7 @@ type CreateUserRequest struct {
 	Password string `json:"password"`
 }
 
-// Validate implementes Request interface.
+// Validate implements Request interface.
 func (r CreateUserRequest) Validate() error {
 	switch {
 	case r.UserID == "":
