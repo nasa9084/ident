@@ -12,11 +12,15 @@ import (
 	"github.com/nasa9084/ident/util"
 )
 
+// UserRepository privides some operations related to user entity.
 type UserRepository struct {
 	RDB *sql.DB
 	KVS redis.Conn
 }
 
+// IsUserExists returns whether given user ID has been used or not.
+// When the user ID has been used, this function returns true, otherwise false.
+// This function returns error when some error is occured on connect to databases.
 func (repo *UserRepository) IsUserExists(ctx context.Context, userid string) (bool, error) {
 	// redis::EXISTS returns 1 if the key exists, otherwise returns 0
 	res, err := redis.Int(repo.KVS.Do("EXISTS", "user:"+userid))
@@ -46,6 +50,8 @@ func (repo *UserRepository) IsUserExists(ctx context.Context, userid string) (bo
 	return false, nil
 }
 
+// CreateUser creates a new temporaly user into KVS.
+// The user is temporaly user, must verify TOTP, must verify email.
 func (repo *UserRepository) CreateUser(ctx context.Context, userid, password string) (string, error) {
 	exists, err := repo.IsUserExists(ctx, userid)
 	if err != nil {
@@ -71,6 +77,8 @@ func (repo *UserRepository) CreateUser(ctx context.Context, userid, password str
 	return sessid, nil
 }
 
+// LookupUserBySessionID finds a user associated with given session ID.
+// This function searches both of RDB and KVS.
 func (repo *UserRepository) LookupUserBySessionID(ctx context.Context, sessid string) (entity.User, error) {
 	var u entity.User
 
@@ -111,6 +119,8 @@ func (repo *UserRepository) LookupUserBySessionID(ctx context.Context, sessid st
 	return u, nil
 }
 
+// LookupUserByUserID finds a user using given user ID.
+// This function searches only RDB, not searches KVS.
 func (repo *UserRepository) LookupUserByUserID(ctx context.Context, uid string) (entity.User, error) {
 	tx, err := repo.RDB.BeginTx(ctx, nil)
 	if err != nil {
@@ -128,6 +138,7 @@ func (repo *UserRepository) LookupUserByUserID(ctx context.Context, uid string) 
 	return u, nil
 }
 
+// VerifyTOTP updates the user has been verified TOTP.
 func (repo *UserRepository) VerifyTOTP(ctx context.Context, u entity.User) error {
 	u.TOTPVerified = true
 
@@ -145,6 +156,7 @@ func (repo *UserRepository) VerifyTOTP(ctx context.Context, u entity.User) error
 	return nil
 }
 
+// UpdateEmail updates user email in KVS.
 func (repo *UserRepository) UpdateEmail(ctx context.Context, u entity.User) error {
 	exists, err := repo.IsUserExists(ctx, u.ID)
 	if err != nil {
@@ -159,6 +171,7 @@ func (repo *UserRepository) UpdateEmail(ctx context.Context, u entity.User) erro
 	return nil
 }
 
+// VerifyEmail move temporaly user into RDB.
 func (repo *UserRepository) VerifyEmail(ctx context.Context, u entity.User) error {
 	exists, err := repo.IsUserExists(ctx, u.ID)
 	if err != nil {
@@ -184,6 +197,8 @@ func (repo *UserRepository) VerifyEmail(ctx context.Context, u entity.User) erro
 	return tx.Commit()
 }
 
+// CreateSession creates a new web session and returns its ID.
+// The session expires in 10 minutes.
 func (repo *UserRepository) CreateSession(ctx context.Context, u entity.User) (string, error) {
 	sessid := uuid.New().String()
 	if _, err := repo.KVS.Do("SET", "session:"+sessid, u.ID, "EX", 60*10); err != nil {
@@ -192,6 +207,8 @@ func (repo *UserRepository) CreateSession(ctx context.Context, u entity.User) (s
 	return sessid, nil
 }
 
+// RenewSession recreates a web session and retursn its ID.
+// The session expires in 10 minutes.
 func (repo *UserRepository) RenewSession(ctx context.Context, u entity.User, oldSessid string) (string, error) {
 	newSessid := uuid.New().String()
 	repo.KVS.Send("MULTI")
