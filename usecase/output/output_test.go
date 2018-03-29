@@ -1,7 +1,7 @@
 package output
 
 import (
-	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"reflect"
@@ -41,8 +41,12 @@ func TestRenderJSON(t *testing.T) {
 	for _, c := range candidates {
 		w := &mockResponseWriter{header: http.Header{}}
 		renderJSON(w, http.StatusOK, c.input)
+		var actual interface{}
+		json.Unmarshal(w.body, &actual)
+		var expected interface{}
+		json.Unmarshal(c.expected, &expected)
 
-		if !reflect.DeepEqual(bytes.Trim(w.body, "\n"), c.expected) {
+		if !reflect.DeepEqual(actual, expected) {
 			t.Errorf("%s != %s", w.body, c.expected)
 			return
 		}
