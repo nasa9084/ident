@@ -77,7 +77,8 @@ func testVerifyTOTPValidate(t *testing.T) {
 		request input.VerifyTOTPRequest
 		hasErr  bool
 	}{
-		{input.VerifyTOTPRequest{Token: "foo", SessionID: "bar"}, false},
+		{input.VerifyTOTPRequest{Token: "000000", SessionID: "bar"}, false},
+		{input.VerifyTOTPRequest{Token: "foo", SessionID: "bar"}, true},
 		{input.VerifyTOTPRequest{Token: "foo"}, true},
 		{input.VerifyTOTPRequest{SessionID: "bar"}, true},
 	}
