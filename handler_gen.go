@@ -1,3 +1,5 @@
+// Code generated genHandler. DO NOT EDIT.
+
 package ident
 
 import (
@@ -17,19 +19,18 @@ import (
 func parseRequest(r *http.Request, dest input.Request) error {
 	if r.Method != http.MethodGet {
 		if err := json.NewDecoder(r.Body).Decode(dest); err != nil {
-			return errors.Wrap(err, `parsing request body`)
+			return errors.Wrap(err, "parsing request body")
 		}
 	}
 	if sessReq, ok := dest.(input.SessionRequest); ok {
 		authorization := r.Header.Get("Authorization")
-		if strings.Contains(authorization, " ") {
+		if strings.Contains(authorization, ` `) {
 			return errors.New("authorization header invalid")
 		}
 		sessReq.SetSessionID(authorization)
 	}
 	if arReq, ok := dest.(input.PathArgsRequest); ok {
-		pathArgs := mux.Vars(r)
-		arReq.SetPathArgs(pathArgs)
+		arReq.SetPathArgs(mux.Vars(r))
 	}
 	return dest.Validate()
 }
@@ -39,7 +40,9 @@ func renderErr(w http.ResponseWriter, err error) {
 	defer bufferpool.Release(buf)
 
 	v := map[string]string{
-		"error":   http.StatusText(http.StatusBadRequest),
+
+		"error": http.StatusText(http.StatusBadRequest),
+
 		"message": err.Error(),
 	}
 	json.NewEncoder(buf).Encode(v)
@@ -48,7 +51,6 @@ func renderErr(w http.ResponseWriter, err error) {
 	buf.WriteTo(w)
 }
 
-// NotFoundHandler is a HTTP handler for 404 Not Found.
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
@@ -63,7 +65,6 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	buf.WriteTo(w)
 }
 
-// MethodNotAllowedHandler is a HTTP handler for 405 Method Not Allowed.
 func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
@@ -78,7 +79,6 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	buf.WriteTo(w)
 }
 
-// CreateUserHandler creates a new user.
 func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.CreateUserRequest
@@ -90,7 +90,6 @@ func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
-// TOTPQRCodeHandler returns TOTP URI QRcode.
 func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.TOTPQRCodeRequest
@@ -98,11 +97,10 @@ func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
 			renderErr(w, err)
 			return
 		}
-		usecase.GetTOTPQRCode(r.Context(), req, env).Render(w)
+		usecase.TOTPQRCode(r.Context(), req, env).Render(w)
 	}
 }
 
-// VerifyTOTPHandler verifies TOTP is successfully configured.
 func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.VerifyTOTPRequest
@@ -114,7 +112,6 @@ func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
-// UpdateEmailHandler updates user email.
 func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.UpdateEmailRequest
@@ -126,7 +123,6 @@ func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
-// VerifyEmailHandler verifies the user's email is valid.
 func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.VerifyEmailRequest
@@ -138,8 +134,6 @@ func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
-// AuthByTOTPHandler authenticates with user ID and TOTP Token.
-// This handler returns session ID if the authentication is passed.
 func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.AuthByTOTPRequest
@@ -151,7 +145,6 @@ func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
-// AuthByPasswordHandler authenticates with session ID and Password.
 func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.AuthByPasswordRequest
@@ -163,10 +156,19 @@ func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 	}
 }
 
-// GetPublicKeyHandler returns ECDSA public key generated from private key
-// for signing JWT token.
 func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		usecase.GetPublicKey(r.Context(), env).Render(w)
+	}
+}
+
+func ExistsUserHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.ExistsUserRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.ExistsUser(r.Context(), req, env).Render(w)
 	}
 }
