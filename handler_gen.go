@@ -35,16 +35,18 @@ func parseRequest(r *http.Request, dest input.Request) error {
 	return dest.Validate()
 }
 
+func newErr(status int, err error) map[string]string {
+	return map[string]string{
+		"error":   http.StatusText(http.StatusBadRequest),
+		"message": err.Error(),
+	}
+}
+
 func renderErr(w http.ResponseWriter, err error) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
 
-	v := map[string]string{
-
-		"error": http.StatusText(http.StatusBadRequest),
-
-		"message": err.Error(),
-	}
+	v := newErr(http.StatusBadRequest, err)
 	json.NewEncoder(buf).Encode(v)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
@@ -55,10 +57,7 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
 
-	v := map[string]string{
-		"error":   http.StatusText(http.StatusNotFound),
-		"message": "endpoint not found",
-	}
+	v := newErr(http.StatusNotFound, errors.New(`endpoint not found`))
 	json.NewEncoder(buf).Encode(v)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
@@ -69,58 +68,11 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
 
-	v := map[string]string{
-		"error":   http.StatusText(http.StatusMethodNotAllowed),
-		"message": fmt.Sprintf("method %s is not allowed", r.Method),
-	}
+	v := newErr(http.StatusMethodNotAllowed, errors.New(fmt.Sprintf(`method %s is not allowed`, r.Method)))
 	json.NewEncoder(buf).Encode(v)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	buf.WriteTo(w)
-}
-
-func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.UpdateEmailRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.UpdateEmail(r.Context(), req, env).Render(w)
-	}
-}
-
-func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.VerifyEmailRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.VerifyEmail(r.Context(), req, env).Render(w)
-	}
-}
-
-func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.AuthByTOTPRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.AuthByTOTP(r.Context(), req, env).Render(w)
-	}
-}
-
-func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.AuthByPasswordRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.AuthByPassword(r.Context(), req, env).Render(w)
-	}
 }
 
 func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
@@ -170,5 +122,49 @@ func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
 			return
 		}
 		usecase.VerifyTOTP(r.Context(), req, env).Render(w)
+	}
+}
+
+func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.UpdateEmailRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.UpdateEmail(r.Context(), req, env).Render(w)
+	}
+}
+
+func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.VerifyEmailRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.VerifyEmail(r.Context(), req, env).Render(w)
+	}
+}
+
+func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.AuthByTOTPRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.AuthByTOTP(r.Context(), req, env).Render(w)
+	}
+}
+
+func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.AuthByPasswordRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.AuthByPassword(r.Context(), req, env).Render(w)
 	}
 }
