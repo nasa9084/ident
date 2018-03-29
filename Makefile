@@ -13,7 +13,7 @@ initdb:
 	@mysql -uroot ident < sql/ident.sql
 
 generate:
-	@go run internal/cmd/genHandler.go -f spec/ident.yml
+	@go run internal/cmd/genHandler/genHandler.go -f spec/ident.yml
 
 test:
 	@TEST_KEYPATH=$(PWD)/key/id_ecdsa go test -v ./...
