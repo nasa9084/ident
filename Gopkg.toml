@@ -48,3 +48,7 @@
 [[constraint]]
   name = "github.com/sendgrid/sendgrid-go"
   version = "3.4.1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/nasa9084/go-openapi"

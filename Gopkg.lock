@@ -56,6 +56,12 @@
   version = "1.0.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/nasa9084/go-openapi"
+  packages = ["."]
+  revision = "867c08381814269f710fd7ab5f7f5639398058fd"
+
+[[projects]]
   name = "github.com/nasa9084/go-totp"
   packages = ["."]
   revision = "6ade359754b1771e51902b8ca936653f0d59a3c8"
@@ -91,9 +97,15 @@
   packages = [".","bitset","reedsolomon"]
   revision = "cf5f9fa2f0d847edb8e038db7ed975e239095e1a"
 
+[[projects]]
+  branch = "v2"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "4fc5987536ef307a24ca299aee7ae301cde3d221"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "16057b9f17b6516fc2a56648efee667309545cb155536c47a1957c133f95c546"
+  inputs-digest = "6a5fd69eedde1df46da4c4abc9a2696c08c83b4707d4d4f2608c529971bb1822"
   solver-name = "gps-cdcl"
   solver-version = 1
