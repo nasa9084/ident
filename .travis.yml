@@ -9,6 +9,9 @@ services:
 
 before_install:
   - go get github.com/golang/dep/...
+  - go get -u golang.org/x/lint/golint
+  - go get -u honnef.co/go/tools/cmd/staticcheck
+  - go get -u honnef.co/go/tools/cmd/gosimple
 
 install:
   - $GOPATH/bin/dep ensure
@@ -19,3 +22,7 @@ before_script:
 
 script:
   - make test
+  - go vet -v ./...
+  - go list ./... | xargs -L1 golint
+  - staticcheck ./...
+  - gosimple ./...
