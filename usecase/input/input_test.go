@@ -20,7 +20,6 @@ func checkValidate(t *testing.T, r input.Request, hasErr bool) {
 }
 
 func TestRequestValidate(t *testing.T) {
-	t.Run("IsUserExistsRequest", testIsUserExistsValidate)
 	t.Run("CreateUserRequest", testCreateUserValidate)
 	t.Run("TOTPQRCodeRequest", testTOTPQRCodeValidate)
 	t.Run("VerifyTOTPRequest", testVerifyTOTPValidate)
@@ -28,20 +27,6 @@ func TestRequestValidate(t *testing.T) {
 	t.Run("VerifyEmailRequest", testVerifyEmailValidate)
 	t.Run("AuthByTOTPRequest", testAuthByTOTPValidate)
 	t.Run("AuthByPasswordReqeust", testAuthByPasswordValidate)
-}
-
-func testIsUserExistsValidate(t *testing.T) {
-	candidates := []struct {
-		request input.IsUserExistsRequest
-		hasErr  bool
-	}{
-		{input.IsUserExistsRequest{UserID: "foo"}, false},
-		{input.IsUserExistsRequest{}, true},
-	}
-
-	for _, c := range candidates {
-		checkValidate(t, c.request, c.hasErr)
-	}
 }
 
 func testCreateUserValidate(t *testing.T) {

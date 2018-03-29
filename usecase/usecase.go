@@ -33,9 +33,9 @@ func statusFromError(err error) int {
 	return http.StatusBadRequest
 }
 
-// IsUserExists returns given user id has been used or not.
-func IsUserExists(ctx context.Context, req input.IsUserExistsRequest, env *infra.Environment) output.Response {
-	var resp output.IsUserExistsResponse
+// ExistsUser returns given user id has been used or not.
+func ExistsUser(ctx context.Context, req input.ExistsUserRequest, env *infra.Environment) output.Response {
+	var resp output.ExistsUserResponse
 
 	repo := env.GetUserRepository()
 	exists, err := repo.IsUserExists(ctx, req.UserID)
@@ -65,8 +65,8 @@ func CreateUser(ctx context.Context, req input.CreateUserRequest, env *infra.Env
 	return resp
 }
 
-// GetTOTPQRCode returns a QR code including TOTP URI associated to given user.
-func GetTOTPQRCode(ctx context.Context, req input.TOTPQRCodeRequest, env *infra.Environment) output.Response {
+// TOTPQRCode returns a QR code including TOTP URI associated to given user.
+func TOTPQRCode(ctx context.Context, req input.TOTPQRCodeRequest, env *infra.Environment) output.Response {
 	var resp output.TOTPQRCodeResponse
 
 	repo := env.GetUserRepository()
@@ -143,8 +143,12 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 		resp.Status = statusFromError(err)
 		return resp
 	}
-	resp.Email = u.Email
-	resp.SessionID = sessid
+	// Mail here
+	if err := env.SendVerifyMail(u.Email, sessid); err != nil {
+		resp.Err = err
+		resp.Status = statusFromError(err)
+		return resp
+	}
 	resp.Status = http.StatusOK
 	return resp
 }

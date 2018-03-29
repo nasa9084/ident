@@ -24,3 +24,8 @@ func (env Environment) GetUserRepository() repository.UserRepository {
 		KVS: env.KVS,
 	}
 }
+
+// SendVerifyMail sends address verification mail using sendgrid.
+func (env Environment) SendVerifyMail(to, sessid string) error {
+	return nil
+}

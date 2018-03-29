@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -46,9 +47,9 @@ func TestUserCreationProcess(t *testing.T) {
 	env := getEnv(t)
 
 	// before create alice
-	ieuReq := input.IsUserExistsRequest{UserID: aliceID}
-	ieuResp := usecase.IsUserExists(context.Background(), ieuReq, env).(output.IsUserExistsResponse)
-	if ieuResp.Exists {
+	euReq := input.ExistsUserRequest{UserID: aliceID}
+	euResp := usecase.ExistsUser(context.Background(), euReq, env).(output.ExistsUserResponse)
+	if euResp.Exists {
 		t.Error("alice should not exists")
 		return
 	}
@@ -89,7 +90,22 @@ func TestUserCreationProcess(t *testing.T) {
 		return
 	}
 
-	vmReq := input.VerifyEmailRequest{SessionID: umResp.SessionID}
+	keys, err := redis.Strings(env.KVS.Do("KEYS", "session:*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var sessid string
+	for _, key := range keys {
+		val, err := redis.String(env.KVS.Do("GET", key))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if val == aliceID {
+			sessid = strings.Split(key, ":")[1]
+		}
+	}
+
+	vmReq := input.VerifyEmailRequest{SessionID: sessid}
 	vmResp := usecase.VerifyEmail(context.Background(), vmReq, env).(output.VerifyEmailResponse)
 
 	if vmResp.Status != http.StatusOK {
