@@ -360,14 +360,17 @@ func generateResponseInterface(buf *bytes.Buffer, responses openapi.Responses) e
 func generateResponseForPathItem(buf *bytes.Buffer, pathItem *openapi.PathItem) error {
 	if pathItem.Get != nil {
 		if err := generateResponse(buf, pathItem.Get); err != nil {
+			return err
 		}
 	}
 	if pathItem.Post != nil {
 		if err := generateResponse(buf, pathItem.Post); err != nil {
+			return err
 		}
 	}
 	if pathItem.Put != nil {
 		if err := generateResponse(buf, pathItem.Put); err != nil {
+			return err
 		}
 	}
 	return nil
