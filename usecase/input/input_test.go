@@ -9,7 +9,8 @@ import (
 func checkValidate(t *testing.T, r input.Request, hasErr bool) {
 	t.Helper()
 	if err := r.Validate(); hasErr != (err != nil) {
-		if hasErr {
+		t.Log(r)
+		if !hasErr {
 			t.Error(err)
 			return
 		}
