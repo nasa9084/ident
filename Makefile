@@ -4,6 +4,8 @@ keygen:
 	@go run internal/cmd/keygen/keygen.go
 
 initdb:
+	@echo "flush redis"
+	@redis-cli flushdb
 	@echo "drop database"
 	@mysql -uroot -e 'DROP DATABASE IF EXISTS ident;'
 	@echo "create database"
