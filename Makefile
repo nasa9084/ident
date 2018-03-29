@@ -12,5 +12,8 @@ initdb:
 	@mysql -uroot -e 'CREATE DATABASE ident;'
 	@mysql -uroot ident < sql/ident.sql
 
+generate:
+	@go run internal/cmd/genHandler.go -f spec/ident.yml
+
 test:
-	@go test -v ./...
+	@TEST_KEYPATH=$(PWD)/key/id_ecdsa go test -v ./...
