@@ -1,0 +1,254 @@
+---
+openapi: 3.0.1
+info:
+  title: identity service
+  version: 0.1.0
+paths:
+  /v1/user/exists/{user_id}:
+    get:
+      summary: returns the user is exists or not.
+      operationId: ExistsUser
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            title: UserID
+            type: string
+      responses:
+        "200":
+          description: user exists or not
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exists:
+                    title: Exists
+                    type: bool
+  /v1/user:
+    post:
+      summary: create a new user into temporaly database.
+      operationId: CreateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["user_id", "password"]
+              properties:
+                user_id:
+                  type: string
+                  title: UserID
+                password:
+                  type: string
+                  title: Password
+        required: true
+      responses:
+        "201":
+          description: created user to be returned
+          headers:
+            X-SESSION-ID:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    title: Message
+                    type: string
+        "409":
+          $ref: "#/components/responses/jsonErr"
+  /user/totp:
+    get:
+      summary: returns TOTP QR code
+      operationId: TOTPQRCode
+      responses:
+        "200":
+          description: TOTP QR code associated with session user
+          content:
+            image/png:
+              schema:
+                title: QRCode
+                type: string
+                format: binary
+      security:
+        - sessionId: []
+    put:
+      summary: verify TOTP configuration
+      operationId: VerifyTOTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["token"]
+              properties:
+                token:
+                  title: Token
+                  type: string
+                  maxLength: 6
+                  minLength: 6
+                  format: digit
+      responses:
+        "200":
+          description: verify status
+          content:
+            applicaiton/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    title: Message
+                    type: string
+      security:
+        - sessionId: []
+  /user/email:
+    put:
+      summary: update email for user
+      operationId: UpdateEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["email"]
+              properties:
+                email:
+                  title: Email
+                  type: string
+      responses:
+        "200":
+          description: updated status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    title: Message
+                    type: string
+      security:
+        - sessionId: []
+  /user/email/{sessid}:
+    get:
+      summary: verify Email address
+      operationId: VerifyEmail
+      parameters:
+        - name: sessid
+          in: path
+          required: true
+          schema:
+            title: SessionID
+            type: string
+      responses:
+        "200":
+          description: verify status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messge:
+                    title: Message
+                    type: string
+  /auth/totp:
+    post:
+      summary: authenticate by TOTP token
+      operationId: AuthByTOTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["user_id", "token"]
+              properties:
+                user_id:
+                  title: UserID
+                  type: string
+                token:
+                  title: Token
+                  type: string
+                  maxLength: 6
+                  minLength: 6
+                  format: digit
+      responses:
+        "200":
+          description: session id and message
+          headers:
+            X-SESSION-ID:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    title: Message
+                    type: string
+        "401":
+          $ref: "#/components/responses/jsonErr"
+  /auth/password:
+    post:
+      summary: authenticate by Password
+      operationId: AuthByPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["password"]
+              properties:
+                password:
+                  title: Password
+                  type: string
+      responses:
+        "200":
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    title: Token
+                    type: string
+        "401":
+          $ref: "#/components/responses/jsonErr"
+      security:
+        - sessionId: []
+  /publickey:
+    get:
+      summary: return ECDSA public key
+      operationId: GetPublicKey
+      responses:
+        "200":
+          description: ECDSA public key
+          content:
+            application/x-pem-file:
+              schema:
+                title: PublicKeyPEM
+                type: string
+                format: binary
+components:
+  responses:
+    jsonErr:
+      description: json error format
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                title: Message
+                type: string
+              error:
+                title: Error
+                type: string
+  securitySchemes:
+    sessionId:
+      type: http
+      scheme: ""
