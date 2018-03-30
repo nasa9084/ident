@@ -5,12 +5,12 @@ keygen:
 
 initdb:
 	@echo "flush redis"
-	@redis-cli flushdb
+	@redis-cli $(REDIS_OPTS) flushdb
 	@echo "drop database"
-	@mysql -uroot -e 'DROP DATABASE IF EXISTS ident;'
+	@mysql $(MYSQL_OPTS) -uroot -e 'DROP DATABASE IF EXISTS ident;'
 	@echo "create database"
-	@mysql -uroot -e 'CREATE DATABASE ident;'
-	@mysql -uroot ident < sql/ident.sql
+	@mysql $(MYSQL_OPTS) -uroot -e 'CREATE DATABASE ident;'
+	@mysql $(MYSQL_OPTS) -uroot ident < sql/ident.sql
 
 generate:
 	@go run internal/cmd/genHandler/genHandler.go -f spec/ident.yml
