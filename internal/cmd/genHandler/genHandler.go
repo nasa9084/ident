@@ -455,10 +455,24 @@ func generateResponse(buf *bytes.Buffer, op *openapi.Operation) error {
 	buf.WriteString("\nrenderJSON(w, resp.Status, resp.Err)")
 	buf.WriteString("\nreturn")
 	buf.WriteString("\n}")
-	if returnSessionID {
-		buf.WriteString("\nrenderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)")
+	buf.WriteString("\nrender")
+	if _, ok := resp.Content["application/json"]; ok {
+		buf.WriteString("JSON")
+		if returnSessionID {
+			buf.WriteString("WithSessionID(w, resp.Status, resp.Err, resp.SessionID)")
+		} else {
+			buf.WriteString("(w, resp.Status, okBody)")
+		}
+	} else if content, ok := resp.Content["image/png"]; ok {
+		buf.WriteString("PNG(w, resp.Status, resp.")
+		buf.WriteString(content.Schema.Title)
+		buf.WriteString(")")
+	} else if content, ok := resp.Content["application/x-pem-file"]; ok {
+		buf.WriteString("PEM(w, resp.Status, resp.")
+		buf.WriteString(content.Schema.Title)
+		buf.WriteString(")")
 	} else {
-		buf.WriteString("\nrenderJSON(w, resp.Status, okBody)")
+		return errors.New("unknown content-type for response")
 	}
 	buf.WriteString("\n}")
 	return nil
