@@ -274,15 +274,13 @@ func generateRequest(buf *bytes.Buffer, op *openapi.Operation) error {
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 
-	if !isSessionRequest {
-		return nil
+	if isSessionRequest {
+		buf.WriteString("\n\nfunc (r *")
+		buf.WriteString(op.OperationID)
+		buf.WriteString("Request) SetSessionID(sessid string) {")
+		buf.WriteString("\nr.SessionID = sessid")
+		buf.WriteString("\n}")
 	}
-	buf.WriteString("\n\nfunc (r *")
-	buf.WriteString(op.OperationID)
-	buf.WriteString("Request) SetSessionID(sessid string) {")
-	buf.WriteString("\nr.SessionID = sessid")
-	buf.WriteString("\n}")
-
 	if isPathArgsRequest {
 		buf.WriteString("\n\nfunc (r *")
 		buf.WriteString(op.OperationID)
