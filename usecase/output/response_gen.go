@@ -16,8 +16,8 @@ type Response interface {
 }
 
 type jsonErr struct {
-	Error   string `json:"error"`
 	Message string `json:"message"`
+	Error   string `json:"error"`
 }
 
 func renderJSON(w http.ResponseWriter, status int, v interface{}) {
@@ -67,21 +67,6 @@ func renderJSONWithSessionID(w http.ResponseWriter, status int, err error, sessi
 	}
 	w.Header().Set("X-SESSION-ID", sessid)
 	renderJSON(w, status, map[string]string{"message": "ok"})
-}
-
-type GetPublicKeyResponse struct {
-	Status int
-	Err    error
-
-	PublicKeyPEM []byte
-}
-
-func (resp GetPublicKeyResponse) Render(w http.ResponseWriter) {
-	if resp.Err != nil {
-		renderJSON(w, resp.Status, resp.Err)
-		return
-	}
-	renderPEM(w, resp.Status, resp.PublicKeyPEM)
 }
 
 type ExistsUserResponse struct {
@@ -206,4 +191,19 @@ func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
 		return
 	}
 	renderJSON(w, resp.Status, okBody)
+}
+
+type GetPublicKeyResponse struct {
+	Status int
+	Err    error
+
+	PublicKeyPEM []byte
+}
+
+func (resp GetPublicKeyResponse) Render(w http.ResponseWriter) {
+	if resp.Err != nil {
+		renderJSON(w, resp.Status, resp.Err)
+		return
+	}
+	renderPEM(w, resp.Status, resp.PublicKeyPEM)
 }
