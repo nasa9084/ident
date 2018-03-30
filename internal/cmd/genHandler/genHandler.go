@@ -291,8 +291,9 @@ func generateRequest(buf *bytes.Buffer, op *openapi.Operation) error {
 			}
 			buf.WriteString("\nr.")
 			buf.WriteString(param.Schema.Title)
-			buf.WriteString(" = ")
+			buf.WriteString(" = args[`")
 			buf.WriteString(param.Name)
+			buf.WriteString("`]")
 		}
 		buf.WriteString("\n}")
 	}
