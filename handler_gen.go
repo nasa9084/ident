@@ -35,22 +35,14 @@ func parseRequest(r *http.Request, dest input.Request) error {
 	return dest.Validate()
 }
 
-func newErr(status int, err error) map[string]string {
-	return map[string]string{
-		"error":   http.StatusText(http.StatusBadRequest),
-		"message": err.Error(),
-	}
-}
+const errMsg = `{"message":"%s","error":"Bad Request"}`
 
 func renderErr(w http.ResponseWriter, err error) {
 	buf := bufferpool.Get()
 	defer bufferpool.Release(buf)
-
-	v := newErr(http.StatusBadRequest, err)
-	json.NewEncoder(buf).Encode(v)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	buf.WriteTo(w)
+	w.Write([]byte(fmt.Sprintf(errMsg, err.Error())))
 }
 
 const (
@@ -68,6 +60,23 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Write([]byte(fmt.Sprintf(methodnotallowedResponse, r.Method)))
+}
+
+func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		usecase.GetPublicKey(r.Context(), env).Render(w)
+	}
+}
+
+func ExistsUserHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.ExistsUserRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.ExistsUser(r.Context(), req, env).Render(w)
+	}
 }
 
 func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
@@ -144,22 +153,5 @@ func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 			return
 		}
 		usecase.AuthByPassword(r.Context(), req, env).Render(w)
-	}
-}
-
-func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		usecase.GetPublicKey(r.Context(), env).Render(w)
-	}
-}
-
-func ExistsUserHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.ExistsUserRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.ExistsUser(r.Context(), req, env).Render(w)
 	}
 }

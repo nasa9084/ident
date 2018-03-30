@@ -16,8 +16,8 @@ type Response interface {
 }
 
 type jsonErr struct {
-	Message string `json:"message"`
 	Error   string `json:"error"`
+	Message string `json:"message"`
 }
 
 func renderJSON(w http.ResponseWriter, status int, v interface{}) {
@@ -69,21 +69,6 @@ func renderJSONWithSessionID(w http.ResponseWriter, status int, err error, sessi
 	renderJSON(w, status, map[string]string{"message": "ok"})
 }
 
-type AuthByPasswordResponse struct {
-	Status int
-	Err    error
-
-	Token string
-}
-
-func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
-	if resp.Err != nil {
-		renderJSON(w, resp.Status, resp.Err)
-		return
-	}
-	renderJSON(w, resp.Status, okBody)
-}
-
 type GetPublicKeyResponse struct {
 	Status int
 	Err    error
@@ -96,7 +81,7 @@ func (resp GetPublicKeyResponse) Render(w http.ResponseWriter) {
 		renderJSON(w, resp.Status, resp.Err)
 		return
 	}
-	renderJSON(w, resp.Status, okBody)
+	renderPEM(w, resp.Status, resp.PublicKeyPEM)
 }
 
 type ExistsUserResponse struct {
@@ -143,7 +128,7 @@ func (resp TOTPQRCodeResponse) Render(w http.ResponseWriter) {
 		renderJSON(w, resp.Status, resp.Err)
 		return
 	}
-	renderJSON(w, resp.Status, okBody)
+	renderPNG(w, resp.Status, resp.QRCode)
 }
 
 type VerifyTOTPResponse struct {
@@ -206,4 +191,19 @@ func (resp AuthByTOTPResponse) Render(w http.ResponseWriter) {
 		return
 	}
 	renderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)
+}
+
+type AuthByPasswordResponse struct {
+	Status int
+	Err    error
+
+	Token string
+}
+
+func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
+	if resp.Err != nil {
+		renderJSON(w, resp.Status, resp.Err)
+		return
+	}
+	renderJSON(w, resp.Status, okBody)
 }
