@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/format"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -517,13 +518,6 @@ func generateHandlerHelper(buf *bytes.Buffer) error {
 	buf.WriteString("\nreturn dest.Validate()")
 	buf.WriteString("\n}")
 
-	buf.WriteString("\n\nfunc newErr(status int, err error) map[string]string {")
-	buf.WriteString("\nreturn map[string]string{")
-	buf.WriteString(fmt.Sprintf("\n%s: http.StatusText(http.StatusBadRequest),", strconv.Quote("error")))
-	buf.WriteString(fmt.Sprintf("\n%s: err.Error(),", strconv.Quote("message")))
-	buf.WriteString("\n}")
-	buf.WriteString("\n}")
-
 	buf.WriteString("\n\nfunc renderErr(w http.ResponseWriter, err error) {")
 	buf.WriteString("\nbuf := bufferpool.Get()")
 	buf.WriteString("\ndefer bufferpool.Release(buf)")
@@ -538,24 +532,26 @@ func generateHandlerHelper(buf *bytes.Buffer) error {
 }
 
 func generateErrHandler(buf *bytes.Buffer) error {
+	buf.WriteString("\n\nconst (")
+	buf.WriteString(fmt.Sprintf("\nnotfoundResponse = `{%s:%s,%s:%s}`",
+		strconv.Quote("message"), strconv.Quote("endpoint not found"),
+		strconv.Quote("error"), strconv.Quote(http.StatusText(http.StatusNotFound)),
+	))
+	buf.WriteString(fmt.Sprintf("\nmethodnotallowedResponse = `{%s:%s,%s:%s}`",
+		strconv.Quote("message"), strconv.Quote("method %s is not allowed"),
+		strconv.Quote("error"), strconv.Quote(http.StatusText(http.StatusMethodNotAllowed)),
+	))
+	buf.WriteString("\n)")
 	buf.WriteString("\n\nfunc NotFoundHandler(w http.ResponseWriter, r *http.Request) {")
-	buf.WriteString("\nbuf := bufferpool.Get()")
-	buf.WriteString("\ndefer bufferpool.Release(buf)")
-	buf.WriteString("\n\nv := newErr(http.StatusNotFound, errors.New(`endpoint not found`))")
-	buf.WriteString("\njson.NewEncoder(buf).Encode(v)")
 	buf.WriteString(fmt.Sprintf("\nw.Header().Set(%s, %s)", strconv.Quote("Content-Type"), strconv.Quote("application/json")))
 	buf.WriteString("\nw.WriteHeader(http.StatusNotFound)")
-	buf.WriteString("\nbuf.WriteTo(w)")
+	buf.WriteString("\nw.Write([]byte(notfoundResponse))")
 	buf.WriteString("\n}")
 
 	buf.WriteString("\n\nfunc MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {")
-	buf.WriteString("\nbuf := bufferpool.Get()")
-	buf.WriteString("\ndefer bufferpool.Release(buf)")
-	buf.WriteString("\n\nv := newErr(http.StatusMethodNotAllowed, errors.New(fmt.Sprintf(`method %s is not allowed`, r.Method)))")
-	buf.WriteString("\njson.NewEncoder(buf).Encode(v)")
 	buf.WriteString(fmt.Sprintf("\nw.Header().Set(%s, %s)", strconv.Quote("Content-Type"), strconv.Quote("application/json")))
 	buf.WriteString("\nw.WriteHeader(http.StatusMethodNotAllowed)")
-	buf.WriteString("\nbuf.WriteTo(w)")
+	buf.WriteString("\nw.Write([]byte(fmt.Sprintf(methodnotallowedResponse, r.Method)))")
 	buf.WriteString("\n}")
 	return nil
 }

@@ -23,18 +23,6 @@ type PathArgsRequest interface {
 	SetPathArgs(map[string]string)
 }
 
-type ExistsUserRequest struct {
-	UserID string `json:"-"`
-}
-
-func (r ExistsUserRequest) Validate() error {
-	switch {
-	case r.UserID == "":
-		return errors.New("user_id is required")
-	}
-	return nil
-}
-
 type CreateUserRequest struct {
 	UserID   string `json:"user_id"`
 	Password string `json:"password"`
@@ -165,4 +153,16 @@ func (r AuthByPasswordRequest) Validate() error {
 
 func (r AuthByPasswordRequest) SetSessionID(sessid string) {
 	r.SessionID = sessid
+}
+
+type ExistsUserRequest struct {
+	UserID string `json:"-"`
+}
+
+func (r ExistsUserRequest) Validate() error {
+	switch {
+	case r.UserID == "":
+		return errors.New("user_id is required")
+	}
+	return nil
 }

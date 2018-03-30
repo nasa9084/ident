@@ -69,6 +69,21 @@ func renderJSONWithSessionID(w http.ResponseWriter, status int, err error, sessi
 	renderJSON(w, status, map[string]string{"message": "ok"})
 }
 
+type AuthByPasswordResponse struct {
+	Status int
+	Err    error
+
+	Token string
+}
+
+func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
+	if resp.Err != nil {
+		renderJSON(w, resp.Status, resp.Err)
+		return
+	}
+	renderJSON(w, resp.Status, okBody)
+}
+
 type GetPublicKeyResponse struct {
 	Status int
 	Err    error
@@ -191,19 +206,4 @@ func (resp AuthByTOTPResponse) Render(w http.ResponseWriter) {
 		return
 	}
 	renderJSONWithSessionID(w, resp.Status, resp.Err, resp.SessionID)
-}
-
-type AuthByPasswordResponse struct {
-	Status int
-	Err    error
-
-	Token string
-}
-
-func (resp AuthByPasswordResponse) Render(w http.ResponseWriter) {
-	if resp.Err != nil {
-		renderJSON(w, resp.Status, resp.Err)
-		return
-	}
-	renderJSON(w, resp.Status, okBody)
 }
