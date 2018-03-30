@@ -61,7 +61,7 @@ paths:
                     type: string
         "409":
           $ref: "#/components/responses/jsonErr"
-  /user/totp:
+  /v1/user/totp:
     get:
       summary: returns TOTP QR code
       operationId: TOTPQRCode
@@ -105,7 +105,7 @@ paths:
                     type: string
       security:
         - sessionId: []
-  /user/email:
+  /v1/user/email:
     put:
       summary: update email for user
       operationId: UpdateEmail
@@ -132,7 +132,7 @@ paths:
                     type: string
       security:
         - sessionId: []
-  /user/email/{sessid}:
+  /v1/user/email/{sessid}:
     get:
       summary: verify Email address
       operationId: VerifyEmail
@@ -154,7 +154,7 @@ paths:
                   messge:
                     title: Message
                     type: string
-  /auth/totp:
+  /v1/auth/totp:
     post:
       summary: authenticate by TOTP token
       operationId: AuthByTOTP
@@ -191,7 +191,7 @@ paths:
                     type: string
         "401":
           $ref: "#/components/responses/jsonErr"
-  /auth/password:
+  /v1/auth/password:
     post:
       summary: authenticate by Password
       operationId: AuthByPassword
@@ -220,7 +220,7 @@ paths:
           $ref: "#/components/responses/jsonErr"
       security:
         - sessionId: []
-  /publickey:
+  /v1/publickey:
     get:
       summary: return ECDSA public key
       operationId: GetPublicKey
