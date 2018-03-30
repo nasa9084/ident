@@ -277,7 +277,7 @@ func generateRequest(buf *bytes.Buffer, op *openapi.Operation) error {
 	if !isSessionRequest {
 		return nil
 	}
-	buf.WriteString("\n\nfunc (r ")
+	buf.WriteString("\n\nfunc (r *")
 	buf.WriteString(op.OperationID)
 	buf.WriteString("Request) SetSessionID(sessid string) {")
 	buf.WriteString("\nr.SessionID = sessid")
