@@ -518,14 +518,15 @@ func generateHandlerHelper(buf *bytes.Buffer) error {
 	buf.WriteString("\nreturn dest.Validate()")
 	buf.WriteString("\n}")
 
+	buf.WriteString(fmt.Sprintf("\n\nconst errMsg = `{%s:%s,%s:%s}`",
+		strconv.Quote("message"), strconv.Quote("%s"),
+		strconv.Quote("error"), strconv.Quote(http.StatusText(http.StatusBadRequest))))
 	buf.WriteString("\n\nfunc renderErr(w http.ResponseWriter, err error) {")
 	buf.WriteString("\nbuf := bufferpool.Get()")
 	buf.WriteString("\ndefer bufferpool.Release(buf)")
-	buf.WriteString("\n\nv := newErr(http.StatusBadRequest, err)")
-	buf.WriteString("\njson.NewEncoder(buf).Encode(v)")
 	buf.WriteString(fmt.Sprintf("\nw.Header().Set(%s, %s)", strconv.Quote("Content-Type"), strconv.Quote("application/json")))
 	buf.WriteString("\nw.WriteHeader(http.StatusBadRequest)")
-	buf.WriteString("\nbuf.WriteTo(w)")
+	buf.WriteString("\nw.Write([]byte(fmt.Sprintf(errMsg, err.Error())))")
 	buf.WriteString("\n}")
 
 	return nil
