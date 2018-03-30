@@ -30,6 +30,10 @@ func _main() int {
 		log.Print(err)
 		return 1
 	}
+	if err := generateServer(spec); err != nil {
+		log.Print(err)
+		return 1
+	}
 	if err := generateRequests(spec); err != nil {
 		log.Print(err)
 		return 1
@@ -44,6 +48,36 @@ func _main() int {
 		return 1
 	}
 	return 0
+}
+
+func generateServer(spec *openapi.Document) error {
+	buf := bytes.Buffer{}
+	buf.WriteString("package ident")
+	buf.WriteString("\nimport (")
+	writeImport(&buf, "net/http")
+	buf.WriteString("\n")
+	writeImport(&buf, "github.com/gorilla/mux")
+	writeImport(&buf, "github.com/nasa9084/ident/infra")
+	buf.WriteString("\n)")
+
+	buf.WriteString("\nfunc bindRoutes(router *mux.Router, env *infra.Environment) {")
+	buf.WriteString("\nrouter.NotFoundHandler = http.HandlerFunc(NotFoundHandler)")
+	buf.WriteString("\nrouter.MethodNotAllowedHandler = http.HandlerFunc(MethodNotAllowedHandler)")
+	for path, pathItem := range spec.Paths {
+		route := "\nrouter.HandleFunc(`%s`, %sHandler(env)).Methods(http.Method%s)"
+		if pathItem.Get != nil {
+			buf.WriteString(fmt.Sprintf(route, path, pathItem.Get.OperationID, "Get"))
+		}
+		if pathItem.Post != nil {
+			buf.WriteString(fmt.Sprintf(route, path, pathItem.Post.OperationID, "Post"))
+		}
+		if pathItem.Put != nil {
+			buf.WriteString(fmt.Sprintf(route, path, pathItem.Put.OperationID, "Put"))
+		}
+	}
+	buf.WriteString("\n}")
+
+	return writeTo(buf.Bytes(), "bindroutes_gen.go")
 }
 
 func generateRequests(spec *openapi.Document) error {

@@ -16,8 +16,8 @@ type Response interface {
 }
 
 type jsonErr struct {
-	Error   string `json:"error"`
 	Message string `json:"message"`
+	Error   string `json:"error"`
 }
 
 func renderJSON(w http.ResponseWriter, status int, v interface{}) {

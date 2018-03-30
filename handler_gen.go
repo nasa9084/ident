@@ -75,6 +75,28 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	buf.WriteTo(w)
 }
 
+func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.AuthByTOTPRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.AuthByTOTP(r.Context(), req, env).Render(w)
+	}
+}
+
+func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.AuthByPasswordRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.AuthByPassword(r.Context(), req, env).Render(w)
+	}
+}
+
 func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		usecase.GetPublicKey(r.Context(), env).Render(w)
@@ -144,27 +166,5 @@ func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
 			return
 		}
 		usecase.VerifyEmail(r.Context(), req, env).Render(w)
-	}
-}
-
-func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.AuthByTOTPRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.AuthByTOTP(r.Context(), req, env).Render(w)
-	}
-}
-
-func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.AuthByPasswordRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.AuthByPassword(r.Context(), req, env).Render(w)
 	}
 }

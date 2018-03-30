@@ -23,60 +23,6 @@ type PathArgsRequest interface {
 	SetPathArgs(map[string]string)
 }
 
-type VerifyEmailRequest struct {
-	SessionID string `json:"-"`
-}
-
-func (r VerifyEmailRequest) Validate() error {
-	switch {
-	case r.SessionID == "":
-		return errors.New("sessid is required")
-	}
-	return nil
-}
-
-type AuthByTOTPRequest struct {
-	UserID string `json:"user_id"`
-	Token  string `json:"token"`
-}
-
-func (r AuthByTOTPRequest) Validate() error {
-	switch {
-	case r.UserID == "":
-		return errors.New("user_id is required ")
-	case r.Token == "":
-		return errors.New("token is required ")
-	case len(r.Token) != 6:
-		return errors.New("length of token is not valid")
-	}
-	for _, r := range r.Token {
-		if !unicode.IsDigit(r) {
-			return errors.New("token must be digit")
-		}
-	}
-	return nil
-}
-
-type AuthByPasswordRequest struct {
-	Password string `json:"password"`
-
-	SessionID string `json:"-"`
-}
-
-func (r AuthByPasswordRequest) Validate() error {
-	switch {
-	case r.SessionID == "":
-		return errors.New("authorization header is required")
-	case r.Password == "":
-		return errors.New("password is required ")
-	}
-	return nil
-}
-
-func (r AuthByPasswordRequest) SetSessionID(sessid string) {
-	r.SessionID = sessid
-}
-
 type ExistsUserRequest struct {
 	UserID string `json:"-"`
 }
@@ -164,5 +110,59 @@ func (r UpdateEmailRequest) Validate() error {
 }
 
 func (r UpdateEmailRequest) SetSessionID(sessid string) {
+	r.SessionID = sessid
+}
+
+type VerifyEmailRequest struct {
+	SessionID string `json:"-"`
+}
+
+func (r VerifyEmailRequest) Validate() error {
+	switch {
+	case r.SessionID == "":
+		return errors.New("sessid is required")
+	}
+	return nil
+}
+
+type AuthByTOTPRequest struct {
+	Token  string `json:"token"`
+	UserID string `json:"user_id"`
+}
+
+func (r AuthByTOTPRequest) Validate() error {
+	switch {
+	case r.UserID == "":
+		return errors.New("user_id is required ")
+	case r.Token == "":
+		return errors.New("token is required ")
+	case len(r.Token) != 6:
+		return errors.New("length of token is not valid")
+	}
+	for _, r := range r.Token {
+		if !unicode.IsDigit(r) {
+			return errors.New("token must be digit")
+		}
+	}
+	return nil
+}
+
+type AuthByPasswordRequest struct {
+	Password string `json:"password"`
+
+	SessionID string `json:"-"`
+}
+
+func (r AuthByPasswordRequest) Validate() error {
+	switch {
+	case r.SessionID == "":
+		return errors.New("authorization header is required")
+	case r.Password == "":
+		return errors.New("password is required ")
+	}
+	return nil
+}
+
+func (r AuthByPasswordRequest) SetSessionID(sessid string) {
 	r.SessionID = sessid
 }
