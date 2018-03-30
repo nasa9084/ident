@@ -284,7 +284,7 @@ func generateRequest(buf *bytes.Buffer, op *openapi.Operation) error {
 	buf.WriteString("\n}")
 
 	if isPathArgsRequest {
-		buf.WriteString("\n\nfunc (r ")
+		buf.WriteString("\n\nfunc (r *")
 		buf.WriteString(op.OperationID)
 		buf.WriteString("Request) SetPathArgs(args map[string]string) {")
 		for _, param := range op.Parameters {
