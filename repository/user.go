@@ -214,6 +214,7 @@ func (repo *UserRepository) RenewSession(ctx context.Context, u entity.User, old
 	repo.KVS.Send("MULTI")
 	repo.KVS.Send("DEL", "session:"+oldSessid)
 	repo.KVS.Send("SET", "session:"+newSessid, u.ID, "EX", 60*10)
+	repo.KVS.Send("EXPIRE", "user:"+u.ID, 60*10)
 	if _, err := repo.KVS.Do("EXEC"); err != nil {
 		return "", err
 	}
