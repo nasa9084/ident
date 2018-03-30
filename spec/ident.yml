@@ -96,7 +96,7 @@ paths:
         "200":
           description: verify status
           content:
-            applicaiton/json:
+            application/json:
               schema:
                 type: object
                 properties:
