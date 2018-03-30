@@ -55,6 +55,10 @@ func (r ExistsUserRequest) Validate() error {
 	return nil
 }
 
+func (r *ExistsUserRequest) SetPathArgs(args map[string]string) {
+	r.UserID = user_id
+}
+
 type CreateUserRequest struct {
 	UserID   string `json:"user_id"`
 	Password string `json:"password"`
@@ -143,6 +147,10 @@ func (r VerifyEmailRequest) Validate() error {
 		return errors.New("sessid is required")
 	}
 	return nil
+}
+
+func (r *VerifyEmailRequest) SetPathArgs(args map[string]string) {
+	r.SessionID = sessid
 }
 
 type AuthByTOTPRequest struct {

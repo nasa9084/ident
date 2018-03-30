@@ -69,21 +69,6 @@ func renderJSONWithSessionID(w http.ResponseWriter, status int, err error, sessi
 	renderJSON(w, status, map[string]string{"message": "ok"})
 }
 
-type ExistsUserResponse struct {
-	Status int
-	Err    error
-
-	Exists bool
-}
-
-func (resp ExistsUserResponse) Render(w http.ResponseWriter) {
-	if resp.Err != nil {
-		renderJSON(w, resp.Status, resp.Err)
-		return
-	}
-	renderJSON(w, resp.Status, okBody)
-}
-
 type CreateUserResponse struct {
 	Status int
 	Err    error
@@ -206,4 +191,19 @@ func (resp GetPublicKeyResponse) Render(w http.ResponseWriter) {
 		return
 	}
 	renderPEM(w, resp.Status, resp.PublicKeyPEM)
+}
+
+type ExistsUserResponse struct {
+	Status int
+	Err    error
+
+	Exists bool
+}
+
+func (resp ExistsUserResponse) Render(w http.ResponseWriter) {
+	if resp.Err != nil {
+		renderJSON(w, resp.Status, resp.Err)
+		return
+	}
+	renderJSON(w, resp.Status, okBody)
 }

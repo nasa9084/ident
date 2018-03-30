@@ -62,6 +62,50 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(methodnotallowedResponse, r.Method)))
 }
 
+func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.TOTPQRCodeRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.TOTPQRCode(r.Context(), req, env).Render(w)
+	}
+}
+
+func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.VerifyTOTPRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.VerifyTOTP(r.Context(), req, env).Render(w)
+	}
+}
+
+func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.UpdateEmailRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.UpdateEmail(r.Context(), req, env).Render(w)
+	}
+}
+
+func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.VerifyEmailRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.VerifyEmail(r.Context(), req, env).Render(w)
+	}
+}
+
 func AuthByTOTPHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.AuthByTOTPRequest
@@ -109,49 +153,5 @@ func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
 			return
 		}
 		usecase.CreateUser(r.Context(), req, env).Render(w)
-	}
-}
-
-func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.TOTPQRCodeRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.TOTPQRCode(r.Context(), req, env).Render(w)
-	}
-}
-
-func VerifyTOTPHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.VerifyTOTPRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.VerifyTOTP(r.Context(), req, env).Render(w)
-	}
-}
-
-func UpdateEmailHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.UpdateEmailRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.UpdateEmail(r.Context(), req, env).Render(w)
-	}
-}
-
-func VerifyEmailHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.VerifyEmailRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.VerifyEmail(r.Context(), req, env).Render(w)
 	}
 }
