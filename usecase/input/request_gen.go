@@ -23,45 +23,9 @@ type PathArgsRequest interface {
 	SetPathArgs(map[string]string)
 }
 
-type AuthByPasswordRequest struct {
-	Password string `json:"password"`
-
-	SessionID string `json:"-"`
-}
-
-func (r AuthByPasswordRequest) Validate() error {
-	switch {
-	case r.SessionID == "":
-		return errors.New("authorization header is required")
-	case r.Password == "":
-		return errors.New("password is required ")
-	}
-	return nil
-}
-
-func (r *AuthByPasswordRequest) SetSessionID(sessid string) {
-	r.SessionID = sessid
-}
-
-type ExistsUserRequest struct {
-	UserID string `json:"-"`
-}
-
-func (r ExistsUserRequest) Validate() error {
-	switch {
-	case r.UserID == "":
-		return errors.New("user_id is required")
-	}
-	return nil
-}
-
-func (r *ExistsUserRequest) SetPathArgs(args map[string]string) {
-	r.UserID = user_id
-}
-
 type CreateUserRequest struct {
-	UserID   string `json:"user_id"`
 	Password string `json:"password"`
+	UserID   string `json:"user_id"`
 }
 
 func (r CreateUserRequest) Validate() error {
@@ -150,7 +114,7 @@ func (r VerifyEmailRequest) Validate() error {
 }
 
 func (r *VerifyEmailRequest) SetPathArgs(args map[string]string) {
-	r.SessionID = sessid
+	r.SessionID = args[`sessid`]
 }
 
 type AuthByTOTPRequest struct {
@@ -173,4 +137,40 @@ func (r AuthByTOTPRequest) Validate() error {
 		}
 	}
 	return nil
+}
+
+type AuthByPasswordRequest struct {
+	Password string `json:"password"`
+
+	SessionID string `json:"-"`
+}
+
+func (r AuthByPasswordRequest) Validate() error {
+	switch {
+	case r.SessionID == "":
+		return errors.New("authorization header is required")
+	case r.Password == "":
+		return errors.New("password is required ")
+	}
+	return nil
+}
+
+func (r *AuthByPasswordRequest) SetSessionID(sessid string) {
+	r.SessionID = sessid
+}
+
+type ExistsUserRequest struct {
+	UserID string `json:"-"`
+}
+
+func (r ExistsUserRequest) Validate() error {
+	switch {
+	case r.UserID == "":
+		return errors.New("user_id is required")
+	}
+	return nil
+}
+
+func (r *ExistsUserRequest) SetPathArgs(args map[string]string) {
+	r.UserID = args[`user_id`]
 }

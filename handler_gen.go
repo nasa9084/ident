@@ -62,6 +62,28 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(methodnotallowedResponse, r.Method)))
 }
 
+func ExistsUserHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.ExistsUserRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.ExistsUser(r.Context(), req, env).Render(w)
+	}
+}
+
+func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req input.CreateUserRequest
+		if err := parseRequest(r, &req); err != nil {
+			renderErr(w, err)
+			return
+		}
+		usecase.CreateUser(r.Context(), req, env).Render(w)
+	}
+}
+
 func TOTPQRCodeHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.TOTPQRCodeRequest
@@ -131,27 +153,5 @@ func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		usecase.GetPublicKey(r.Context(), env).Render(w)
-	}
-}
-
-func ExistsUserHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.ExistsUserRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.ExistsUser(r.Context(), req, env).Render(w)
-	}
-}
-
-func CreateUserHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req input.CreateUserRequest
-		if err := parseRequest(r, &req); err != nil {
-			renderErr(w, err)
-			return
-		}
-		usecase.CreateUser(r.Context(), req, env).Render(w)
 	}
 }
