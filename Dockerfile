@@ -10,5 +10,6 @@ RUN apk add --no-cache git make && \
 FROM alpine:latest
 COPY --from=build /go/src/github.com/nasa9084/ident/ident /app
 COPY --from=build /go/src/github.com/nasa9084/ident/key /key
+RUN apk add --no-cache ca-certificates
 EXPOSE 8080
 CMD ["/app"]
