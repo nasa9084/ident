@@ -14,6 +14,7 @@ import (
 	"github.com/nasa9084/ident/usecase"
 	"github.com/nasa9084/ident/usecase/input"
 	"github.com/nasa9084/ident/usecase/output"
+	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 func getEnv(t *testing.T) *infra.Environment {
@@ -25,6 +26,7 @@ func getEnv(t *testing.T) *infra.Environment {
 	if err != nil {
 		t.Fatal(err)
 	}
+	sg := sendgrid.NewSendClient("")
 	key, err := infra.LoadPrivateKey(os.Getenv("TEST_KEYPATH"))
 	if err != nil {
 		t.Fatal(err)
@@ -32,6 +34,7 @@ func getEnv(t *testing.T) *infra.Environment {
 	env := &infra.Environment{
 		RDB:        rdb,
 		KVS:        kvs,
+		Mail:       sg,
 		PrivateKey: key,
 	}
 	return env

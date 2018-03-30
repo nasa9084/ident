@@ -27,5 +27,6 @@ func (env Environment) GetUserRepository() repository.UserRepository {
 
 // SendVerifyMail sends address verification mail using sendgrid.
 func (env Environment) SendVerifyMail(to, sessid string) error {
-	return nil
+	_, err := env.Mail.Send(NewVerificationMail(to, sessid))
+	return err
 }
