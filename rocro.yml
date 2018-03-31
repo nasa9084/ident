@@ -1,5 +1,0 @@
----
-inspecode:
-  experimental:
-    runtime:
-      go: 1
