@@ -131,3 +131,28 @@ func testAuthByPasswordValidate(t *testing.T) {
 		checkValidate(t, c.request, c.hasErr)
 	}
 }
+
+const sessid = "foobarbaz"
+
+func TestSetSessionID(t *testing.T) {
+	t.Run("TOTPQRCode", testTOTPQRCodeSetSessionID)
+	t.Run("VerifyTOTP", testVerifyTOTPSetSessionID)
+}
+
+func testTOTPQRCodeSetSessionID(t *testing.T) {
+	totpQRCode := input.TOTPQRCodeRequest{}
+	totpQRCode.SetSessionID(sessid)
+	if totpQRCode.SessionID != sessid {
+		t.Errorf("%s != %s", totpQRCode.SessionID, sessid)
+		return
+	}
+}
+
+func testVerifyTOTPSetSessionID(t *testing.T) {
+	verifyTOTP := input.VerifyTOTPRequest{}
+	verifyTOTP.SetSessionID(sessid)
+	if verifyTOTP.SessionID != sessid {
+		t.Errorf("%s != %s", verifyTOTP.SessionID, sessid)
+		return
+	}
+}
