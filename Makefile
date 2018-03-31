@@ -16,4 +16,8 @@ generate:
 	@go run internal/cmd/genHandler/genHandler.go -f spec/ident.yml
 
 test:
-	@TEST_KEYPATH=$(PWD)/key/id_ecdsa go test -v ./...
+	@$(eval DBNAME := $(shell python -c "import uuid; print(str(uuid.uuid4()).replace('-', ''))"))
+	@mysql $(MYSQL_OPTS) -uroot -e "CREATE DATABASE $(DBNAME);"
+	@mysql $(MYSQL_OPTS) -uroot $(DBNAME) < sql/ident.sql
+	@-TEST_KEYPATH=$(PWD)/key/id_ecdsa MYSQL_DB=$(DBNAME) go test -v ./...
+	@mysql $(MYSQL_OPTS) -uroot -e "DROP DATABASE $(DBNAME);"
