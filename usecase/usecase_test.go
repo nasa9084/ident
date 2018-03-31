@@ -18,7 +18,11 @@ import (
 )
 
 func getEnv(t *testing.T) *infra.Environment {
-	rdb, err := infra.OpenMySQL("localhost:3306", "root", "", "ident")
+	dbname := os.Getenv("MYSQL_DB")
+	if dbname == "" {
+		dbname = "ident"
+	}
+	rdb, err := infra.OpenMySQL("localhost:3306", "root", "", dbname)
 	if err != nil {
 		t.Fatal(err)
 	}
