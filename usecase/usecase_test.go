@@ -11,10 +11,10 @@ import (
 	"github.com/gomodule/redigo/redis"
 	totp "github.com/nasa9084/go-totp"
 	"github.com/nasa9084/ident/infra"
+	"github.com/nasa9084/ident/infra/mail"
 	"github.com/nasa9084/ident/usecase"
 	"github.com/nasa9084/ident/usecase/input"
 	"github.com/nasa9084/ident/usecase/output"
-	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 func getEnv(t *testing.T) *infra.Environment {
@@ -30,7 +30,7 @@ func getEnv(t *testing.T) *infra.Environment {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sg := sendgrid.NewSendClient("")
+	sg := mail.NewSendGrid("", "")
 	key, err := infra.LoadPrivateKey(os.Getenv("TEST_KEYPATH"))
 	if err != nil {
 		t.Fatal(err)

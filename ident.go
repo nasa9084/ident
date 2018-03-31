@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nasa9084/ident/infra"
+	"github.com/nasa9084/ident/infra/mail"
 	"github.com/nasa9084/syg"
-	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
 // Server is a main application object.
@@ -36,8 +36,8 @@ type RedisConfig struct {
 // MailConfig holds configuration to use to sendgrid API.
 // This struct can also be used for go-flags.
 type MailConfig struct {
-	Addr   string `long:"email" env:"EMAIL_ADDR"`
-	APIKey string `long:"sg-apikey" env:"SENDGRID_APIKEY" value-name:"SENDGRID_APIKEY" required:"yes"`
+	FromAddr string `long:"email" env:"EMAIL_ADDR"`
+	APIKey   string `long:"sg-apikey" env:"SENDGRID_APIKEY" value-name:"SENDGRID_APIKEY" required:"yes"`
 }
 
 // NewServer returns a new server.
@@ -50,7 +50,7 @@ func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg R
 	if err != nil {
 		return nil, err
 	}
-	mailcli := sendgrid.NewSendClient(mailCfg.APIKey)
+	mailer := mail.NewSendGrid(mailCfg.APIKey, mailCfg.FromAddr)
 	key, err := infra.LoadPrivateKey(privKeyPath)
 	if err != nil {
 		return nil, err
@@ -58,8 +58,7 @@ func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg R
 	env := &infra.Environment{
 		RDB:        rdb,
 		KVS:        kvs,
-		MailFrom:   mailCfg.Addr,
-		Mail:       mailcli,
+		Mail:       mailer,
 		PrivateKey: key,
 	}
 	router := mux.NewRouter()
