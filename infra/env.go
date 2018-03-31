@@ -13,6 +13,7 @@ import (
 type Environment struct {
 	RDB        *sql.DB
 	KVS        redis.Conn
+	MailFrom   string
 	Mail       *sendgrid.Client
 	PrivateKey *ecdsa.PrivateKey
 }
@@ -26,7 +27,7 @@ func (env Environment) GetUserRepository() repository.UserRepository {
 }
 
 // SendVerifyMail sends address verification mail using sendgrid.
-func (env Environment) SendVerifyMail(to, sessid string) error {
-	_, err := env.Mail.Send(NewVerificationMail(to, sessid))
+func (env Environment) SendVerifyMail(from, to, sessid string) error {
+	_, err := env.Mail.Send(NewVerificationMail(from, to, sessid))
 	return err
 }

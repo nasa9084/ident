@@ -144,7 +144,7 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 		return resp
 	}
 	// Mail here
-	if err := env.SendVerifyMail(u.Email, sessid); err != nil {
+	if err := env.SendVerifyMail(env.MailFrom, u.Email, sessid); err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
 		return resp

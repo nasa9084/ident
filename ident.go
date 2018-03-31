@@ -36,6 +36,7 @@ type RedisConfig struct {
 // MailConfig holds configuration to use to sendgrid API.
 // This struct can also be used for go-flags.
 type MailConfig struct {
+	Addr   string `long:"email" env:"EMAIL_ADDR"`
 	APIKey string `long:"sg-apikey" env:"SENDGRID_APIKEY" value-name:"SENDGRID_APIKEY" required:"yes"`
 }
 
@@ -57,6 +58,7 @@ func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg R
 	env := &infra.Environment{
 		RDB:        rdb,
 		KVS:        kvs,
+		MailFrom:   mailCfg.Addr,
 		Mail:       mailcli,
 		PrivateKey: key,
 	}
