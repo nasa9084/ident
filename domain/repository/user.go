@@ -105,11 +105,8 @@ func (repo *UserRepository) CreateUser(ctx context.Context, userid, password str
 func (repo *UserRepository) LookupUserBySessionID(ctx context.Context, sessid string) (entity.User, error) {
 	var u entity.User
 
-	uid, err := redis.String(repo.KVS.Do("GET", "session:"+sessid))
+	uid, err := repo.findSession(sessid)
 	if err != nil {
-		if err == redis.ErrNil {
-			return u, errors.New("no session id found")
-		}
 		return u, err
 	}
 	udb, err := repo.LookupUserByUserID(ctx, uid)
@@ -119,16 +116,35 @@ func (repo *UserRepository) LookupUserBySessionID(ctx context.Context, sessid st
 	if err != nil && err != sql.ErrNoRows {
 		return u, err
 	}
-
-	uar, err := redis.Strings(repo.KVS.Do("HGETALL", "user:"+uid))
+	u, err = repo.findUserFromKVS(uid)
 	if err != nil {
 		return u, err
+	}
+	return u, nil
+}
+
+func (repo *UserRepository) findSession(sessid string) (string, error) {
+	uid, err := redis.String(repo.KVS.Do("GET", "session:"+sessid))
+	if err != nil {
+		if err == redis.ErrNil {
+			return "", errors.New("no sessiond id found")
+		}
+		return "", err
+	}
+	return uid, nil
+}
+
+func (repo *UserRepository) findUserFromKVS(uid string) (entity.User, error) {
+	uar, err := redis.Strings(repo.KVS.Do("HGETALL", "user:"+uid))
+	if err != nil {
+		return entity.User{}, err
 	}
 	ump := map[string]string{}
 	for i := 0; i < len(uar)/2; i++ {
 		// uar is []string{KEY, VALUE, KEY, VALUE...}
 		ump[uar[i*2]] = uar[i*2+1]
 	}
+	var u entity.User
 	u.ID = uid
 	u.Password = ump["password"]
 	u.TOTPSecret = ump["totp_secret"]
