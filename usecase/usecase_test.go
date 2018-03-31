@@ -2,12 +2,14 @@ package usecase_test
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
 	totp "github.com/nasa9084/go-totp"
 	"github.com/nasa9084/ident/infra"
@@ -22,11 +24,18 @@ func getEnv(t *testing.T) *infra.Environment {
 	if dbname == "" {
 		dbname = "ident"
 	}
-	rdb, err := infra.OpenMySQL("localhost:3306", "root", "", dbname)
+	cfg := mysql.Config{
+		Net:       "tcp",
+		Addr:      "localhost:3306",
+		User:      "root",
+		DBName:    dbname,
+		ParseTime: true,
+	}
+	rdb, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
 		t.Fatal(err)
 	}
-	kvs, err := infra.OpenRedis("localhost:6379")
+	kvs, err := redis.Dial("tcp", "localhost:6379")
 	if err != nil {
 		t.Fatal(err)
 	}

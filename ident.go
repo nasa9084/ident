@@ -2,10 +2,13 @@ package ident
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
 	"github.com/nasa9084/ident/infra"
 	"github.com/nasa9084/ident/infra/mail"
@@ -42,11 +45,11 @@ type MailConfig struct {
 
 // NewServer returns a new server.
 func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg RedisConfig, mailCfg MailConfig) (*Server, error) {
-	rdb, err := infra.OpenMySQL(mysqlCfg.Addr, mysqlCfg.User, mysqlCfg.Password, mysqlCfg.DBName)
+	rdb, err := openMySQL(mysqlCfg)
 	if err != nil {
 		return nil, err
 	}
-	kvs, err := infra.OpenRedis(redisCfg.Addr)
+	kvs, err := redis.Dial("tcp", redisCfg.Addr)
 	if err != nil {
 		return nil, err
 	}
@@ -91,4 +94,17 @@ func (s *Server) Shutdown(os.Signal) {
 	log.Print("server shutdown")
 
 	s.server.Shutdown(context.Background())
+}
+
+func openMySQL(opts MySQLConfig) (*sql.DB, error) {
+	cfg := mysql.Config{
+		Net:    "tcp",
+		Addr:   opts.Addr,
+		User:   opts.User,
+		Passwd: opts.Password,
+		DBName: opts.DBName,
+
+		ParseTime: true,
+	}
+	return sql.Open("mysql", cfg.FormatDSN())
 }
