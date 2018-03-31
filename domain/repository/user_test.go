@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
-	"github.com/nasa9084/ident/repository"
+	"github.com/nasa9084/ident/domain/repository"
 )
 
 var (

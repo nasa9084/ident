@@ -8,7 +8,7 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
-	"github.com/nasa9084/ident/entity"
+	"github.com/nasa9084/ident/domain/entity"
 	"github.com/nasa9084/ident/util"
 )
 

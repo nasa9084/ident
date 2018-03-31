@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/nasa9084/ident/repository"
+	"github.com/nasa9084/ident/domain/repository"
 	sendgrid "github.com/sendgrid/sendgrid-go"
 )
 
