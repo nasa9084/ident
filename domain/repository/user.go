@@ -103,22 +103,20 @@ func (repo *UserRepository) CreateUser(ctx context.Context, userid, password str
 // LookupUserBySessionID finds a user associated with given session ID.
 // This function searches both of RDB and KVS.
 func (repo *UserRepository) LookupUserBySessionID(ctx context.Context, sessid string) (entity.User, error) {
-	var u entity.User
-
 	uid, err := repo.findSession(sessid)
 	if err != nil {
-		return u, err
+		return entity.User{}, err
 	}
 	udb, err := repo.LookupUserByUserID(ctx, uid)
 	if err == nil {
 		return udb, nil
 	}
 	if err != nil && err != sql.ErrNoRows {
-		return u, err
+		return entity.User{}, err
 	}
-	u, err = repo.findUserFromKVS(uid)
+	u, err := repo.findUserFromKVS(uid)
 	if err != nil {
-		return u, err
+		return entity.User{}, err
 	}
 	return u, nil
 }
