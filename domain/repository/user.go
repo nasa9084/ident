@@ -22,14 +22,37 @@ type UserRepository struct {
 // When the user ID has been used, this function returns true, otherwise false.
 // This function returns error when some error is occurred on connect to databases.
 func (repo *UserRepository) IsUserExists(ctx context.Context, userid string) (bool, error) {
+	exists, err := repo.isUserExistsInKVS(userid)
+	if err != nil {
+		return false, err
+	}
+	if exists {
+		return true, nil
+	}
+	exists, err = repo.isUserExistsInRDB(ctx, userid)
+	if err != nil {
+		return false, err
+	}
+	if exists {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (repo *UserRepository) isUserExistsInKVS(userid string) (bool, error) {
+	const exist = 1
 	// redis::EXISTS returns 1 if the key exists, otherwise returns 0
 	res, err := redis.Int(repo.KVS.Do("EXISTS", "user:"+userid))
 	if err != nil {
 		return false, err
 	}
-	if res == 1 { // exists
+	if res == exist {
 		return true, nil
 	}
+	return false, nil
+}
+
+func (repo *UserRepository) isUserExistsInRDB(ctx context.Context, userid string) (bool, error) {
 	// if not exists on redis, search on mysql
 	tx, err := repo.RDB.BeginTx(ctx, nil)
 	if err != nil {
