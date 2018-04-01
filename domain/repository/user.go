@@ -12,6 +12,16 @@ import (
 	"github.com/nasa9084/ident/util"
 )
 
+// UserRepo is an interface of operations with user.
+type UserRepo interface {
+	ExistsUser(ctx context.Context, userID string) (exists bool, err error)
+	CreateUser(ctx context.Context, userID, password string) (sessionID string, err error)
+	FindUserBySessionID(ctx context.Context, sessionID string) (entity.User, error)
+	FindUserByID(ctx context.Context, userID string) (entity.User, error)
+	UpdateUser(context.Context, entity.User) error
+	Verify(context.Context, entity.User) error
+}
+
 // UserRepository privides some operations related to user entity.
 type UserRepository struct {
 	RDB *sql.DB
