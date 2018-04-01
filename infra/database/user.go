@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 	"strconv"
 
@@ -125,7 +124,7 @@ func (repo *userRepository) findFromRedis(userID string) (entity.User, error) {
 		return nilUser, err
 	}
 	if len(userMap) == 0 {
-		return nilUser, errors.New("user not found")
+		return nilUser, ErrUserNotFound
 	}
 
 	u := entity.User{
@@ -172,7 +171,7 @@ func (repo *userRepository) UpdateUser(ctx context.Context, u entity.User) error
 	if inMySQL {
 		return repo.updateMySQL(ctx, u)
 	}
-	return errors.New("user not found")
+	return ErrUserNotFound
 }
 
 func (repo *userRepository) updateRedis(u entity.User) error {
@@ -207,7 +206,7 @@ func (repo *userRepository) Verify(ctx context.Context, u entity.User) error {
 		return err
 	}
 	if !exists {
-		return errors.New("user not found")
+		return ErrUserNotFound
 	}
 	if err := repo.createInMySQL(ctx, u); err != nil {
 		return err
