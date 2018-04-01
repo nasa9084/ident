@@ -2,9 +2,7 @@ package usecase
 
 import (
 	"context"
-	"crypto/sha512"
 	"crypto/x509"
-	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"net/http"
@@ -17,6 +15,7 @@ import (
 	"github.com/nasa9084/ident/infra"
 	"github.com/nasa9084/ident/usecase/input"
 	"github.com/nasa9084/ident/usecase/output"
+	"github.com/nasa9084/ident/util"
 	qrcode "github.com/skip2/go-qrcode"
 )
 
@@ -217,10 +216,7 @@ func AuthByPassword(ctx context.Context, req input.AuthByPasswordRequest, env *i
 		return resp
 	}
 
-	for i := 0; i < 30; i++ {
-		h := sha512.Sum512([]byte(req.Password + u.ID))
-		req.Password = hex.EncodeToString(h[:])
-	}
+	req.Password = util.Hash(req.Password, u.ID)
 
 	if u.Password != req.Password {
 		resp.Err = errors.New("password invalid")
