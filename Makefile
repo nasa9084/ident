@@ -3,14 +3,16 @@ keygen:
 	@mkdir key
 	@go run internal/cmd/keygen/keygen.go
 
-initdb:
-	@echo "flush redis"
-	@redis-cli $(REDIS_OPTS) flushdb
+initdb: initredis
 	@echo "drop database"
 	@mysql $(MYSQL_OPTS) -uroot -e 'DROP DATABASE IF EXISTS ident;'
 	@echo "create database"
 	@mysql $(MYSQL_OPTS) -uroot -e 'CREATE DATABASE ident;'
 	@mysql $(MYSQL_OPTS) -uroot ident < sql/ident.sql
+
+initredis:
+	@echo "flush redis"
+	@redis-cli $(REDIS_OPTS) flushdb
 
 generate:
 	@go run internal/cmd/genHandler/genHandler.go -f spec/ident.yml
