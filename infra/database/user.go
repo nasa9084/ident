@@ -10,6 +10,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/nasa9084/ident/domain/entity"
+	"github.com/nasa9084/ident/domain/repository"
 	"github.com/nasa9084/ident/util"
 )
 
@@ -18,6 +19,14 @@ var nilUser = entity.User{}
 type userRepository struct {
 	MySQL *sql.DB
 	Redis redis.Conn
+}
+
+// NewUserRepository returns a new UserRepo instance.
+func NewUserRepository(rdb *sql.DB, kvs redis.Conn) repository.UserRepo {
+	return &userRepository{
+		MySQL: rdb,
+		Redis: kvs,
+	}
 }
 
 // ExistsUser returns whether the user id has been used or not.

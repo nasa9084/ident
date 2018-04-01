@@ -38,7 +38,7 @@ func ExistsUser(ctx context.Context, req input.ExistsUserRequest, env *infra.Env
 	var resp output.ExistsUserResponse
 
 	repo := env.GetUserRepository()
-	exists, err := repo.IsUserExists(ctx, req.UserID)
+	exists, err := repo.ExistsUser(ctx, req.UserID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -70,7 +70,7 @@ func TOTPQRCode(ctx context.Context, req input.TOTPQRCodeRequest, env *infra.Env
 	var resp output.TOTPQRCodeResponse
 
 	repo := env.GetUserRepository()
-	u, err := repo.LookupUserBySessionID(ctx, req.SessionID)
+	u, err := repo.FindUserBySessionID(ctx, req.SessionID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -93,7 +93,7 @@ func VerifyTOTP(ctx context.Context, req input.VerifyTOTPRequest, env *infra.Env
 	var resp output.VerifyTOTPResponse
 
 	repo := env.GetUserRepository()
-	u, err := repo.LookupUserBySessionID(ctx, req.SessionID)
+	u, err := repo.FindUserBySessionID(ctx, req.SessionID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -105,7 +105,8 @@ func VerifyTOTP(ctx context.Context, req input.VerifyTOTPRequest, env *infra.Env
 		resp.Status = http.StatusUnauthorized
 		return resp
 	}
-	if err := repo.VerifyTOTP(ctx, u); err != nil {
+	u.TOTPVerified = true
+	if err := repo.UpdateUser(ctx, u); err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
 		return resp
@@ -120,7 +121,7 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 	var resp output.UpdateEmailResponse
 
 	repo := env.GetUserRepository()
-	u, err := repo.LookupUserBySessionID(ctx, req.SessionID)
+	u, err := repo.FindUserBySessionID(ctx, req.SessionID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -132,12 +133,12 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 		return resp
 	}
 	u.Email = req.Email
-	if err := repo.UpdateEmail(ctx, u); err != nil {
+	if err := repo.UpdateUser(ctx, u); err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
 		return resp
 	}
-	sessid, err := repo.RenewSession(ctx, u, req.SessionID)
+	sessid, err := repo.CreateSession(u)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -157,13 +158,13 @@ func UpdateEmail(ctx context.Context, req input.UpdateEmailRequest, env *infra.E
 func VerifyEmail(ctx context.Context, req input.VerifyEmailRequest, env *infra.Environment) output.Response {
 	var resp output.VerifyEmailResponse
 	repo := env.GetUserRepository()
-	u, err := repo.LookupUserBySessionID(ctx, req.SessionID)
+	u, err := repo.FindUserBySessionID(ctx, req.SessionID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
 		return resp
 	}
-	if err := repo.VerifyEmail(ctx, u); err != nil {
+	if err := repo.Verify(ctx, u); err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
 		return resp
@@ -178,7 +179,7 @@ func VerifyEmail(ctx context.Context, req input.VerifyEmailRequest, env *infra.E
 func AuthByTOTP(ctx context.Context, req input.AuthByTOTPRequest, env *infra.Environment) output.Response {
 	var resp output.AuthByTOTPResponse
 	repo := env.GetUserRepository()
-	u, err := repo.LookupUserByUserID(ctx, req.UserID)
+	u, err := repo.FindUserByID(ctx, req.UserID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -191,7 +192,7 @@ func AuthByTOTP(ctx context.Context, req input.AuthByTOTPRequest, env *infra.Env
 		return resp
 	}
 
-	sessid, err := repo.CreateSession(ctx, u)
+	sessid, err := repo.CreateSession(u)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
@@ -208,7 +209,7 @@ func AuthByTOTP(ctx context.Context, req input.AuthByTOTPRequest, env *infra.Env
 func AuthByPassword(ctx context.Context, req input.AuthByPasswordRequest, env *infra.Environment) output.Response {
 	var resp output.AuthByPasswordResponse
 	repo := env.GetUserRepository()
-	u, err := repo.LookupUserBySessionID(ctx, req.SessionID)
+	u, err := repo.FindUserBySessionID(ctx, req.SessionID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)

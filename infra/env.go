@@ -8,6 +8,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/nasa9084/ident/domain/repository"
 	"github.com/nasa9084/ident/domain/service"
+	"github.com/nasa9084/ident/infra/database"
 )
 
 // Environment holds RDB Connection, KVS Connection, and Private KEY.
@@ -20,11 +21,8 @@ type Environment struct {
 }
 
 // GetUserRepository generates UserRepository instance fron env itself.
-func (env Environment) GetUserRepository() repository.UserRepository {
-	return repository.UserRepository{
-		RDB: env.RDB,
-		KVS: env.KVS,
-	}
+func (env Environment) GetUserRepository() repository.UserRepo {
+	return database.NewUserRepository(env.RDB, env.KVS)
 }
 
 // SendVerifyMail sends address verification mail using sendgrid.
