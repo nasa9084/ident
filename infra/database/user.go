@@ -124,6 +124,9 @@ func (repo *userRepository) findFromRedis(userID string) (entity.User, error) {
 	if err != nil {
 		return nilUser, err
 	}
+	if len(userMap) == 0 {
+		return nilUser, errors.New("user not found")
+	}
 
 	u := entity.User{
 		ID:         userID,
