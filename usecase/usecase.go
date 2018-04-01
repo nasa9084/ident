@@ -8,13 +8,12 @@ import (
 	"encoding/pem"
 	"errors"
 	"net/http"
-	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
 	totp "github.com/nasa9084/go-totp"
 	"github.com/nasa9084/ident/domain/repository"
+	"github.com/nasa9084/ident/generator"
 	"github.com/nasa9084/ident/infra"
 	"github.com/nasa9084/ident/usecase/input"
 	"github.com/nasa9084/ident/usecase/output"
@@ -229,18 +228,13 @@ func AuthByPassword(ctx context.Context, req input.AuthByPasswordRequest, env *i
 		return resp
 	}
 
-	expire := time.Now().Add(1 * time.Hour).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
-		"exp":     expire,
-		"user_id": u.ID,
-	})
-	signed, err := token.SignedString(env.PrivateKey)
+	token, err := generator.NewToken(env.PrivateKey, u.ID)
 	if err != nil {
 		resp.Err = err
 		resp.Status = statusFromError(err)
 		return resp
 	}
-	resp.Token = signed
+	resp.Token = token
 	resp.Status = http.StatusOK
 	return resp
 }
