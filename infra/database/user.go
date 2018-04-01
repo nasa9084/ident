@@ -247,3 +247,12 @@ func (repo *userRepository) deleteFromMySQL(ctx context.Context, u entity.User) 
 	}
 	return tx.Commit()
 }
+
+func (repo *userRepository) CreateSession(u entity.User) (string, error) {
+	sessid := uuid.New().String()
+	_, err := repo.Redis.Do("SET", "session:"+sessid, u.ID)
+	if err != nil {
+		return "", err
+	}
+	return sessid, nil
+}

@@ -20,6 +20,7 @@ type UserRepo interface {
 	FindUserByID(ctx context.Context, userID string) (entity.User, error)
 	UpdateUser(context.Context, entity.User) error
 	Verify(context.Context, entity.User) error
+	CreateSession(entity.User) (sessionID string, err error)
 }
 
 // UserRepository privides some operations related to user entity.
