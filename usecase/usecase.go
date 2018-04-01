@@ -29,6 +29,8 @@ func statusFromError(err error) int {
 	switch err {
 	case repository.ErrUserExists:
 		return http.StatusConflict
+	case redis.ErrNil:
+		return http.StatusNotFound
 	}
 	return http.StatusBadRequest
 }
