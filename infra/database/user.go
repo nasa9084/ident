@@ -109,7 +109,7 @@ func (repo *userRepository) FindUserByID(ctx context.Context, userID string) (en
 	var u entity.User
 	var err error
 	u, err = repo.findFromRedis(userID)
-	if err != nil {
+	if err != nil && err != ErrUserNotFound {
 		return nilUser, err
 	}
 	if u != nilUser {
