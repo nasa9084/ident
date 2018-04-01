@@ -5,6 +5,8 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+	"github.com/nasa9084/ident/util"
 )
 
 // TimeFunc returns current time.
@@ -21,4 +23,9 @@ func NewToken(privKey *ecdsa.PrivateKey, userID string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	return token.SignedString(privKey)
+}
+
+// NewSecret generates a new secret for TOTP Secret.
+func NewSecret() string {
+	return util.SHA512Digest(uuid.New().String())
 }

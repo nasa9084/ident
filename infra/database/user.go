@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nasa9084/ident/domain/entity"
 	"github.com/nasa9084/ident/domain/repository"
+	"github.com/nasa9084/ident/generator"
 	"github.com/nasa9084/ident/util"
 )
 
@@ -43,7 +44,7 @@ func (repo *userRepository) ExistsUser(ctx context.Context, userID string) (bool
 // CreateUser creates a new user into Redis and returns the session id.
 // The user is temporary user.
 func (repo *userRepository) CreateUser(ctx context.Context, userID, password string) (string, error) {
-	secret := util.SHA512Digest(uuid.New().String())
+	secret := generator.NewSecret()
 	userKey := "user:" + userID
 
 	repo.Redis.Send("MULTI")
