@@ -102,7 +102,7 @@ func (repo *userRepository) FindUserBySessionID(ctx context.Context, sessid stri
 }
 
 func (repo *userRepository) findSession(sessid string) (string, error) {
-	return redis.String(repo.Redis.Do("GET", "sessiond:"+sessid))
+	return redis.String(repo.Redis.Do("GET", "session:"+sessid))
 }
 
 // FindUserByID finds user using given user id.
