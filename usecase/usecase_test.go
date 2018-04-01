@@ -135,6 +135,7 @@ func TestUserCreationProcess(t *testing.T) {
 	atResp := usecase.AuthByTOTP(context.Background(), atReq, env).(output.AuthByTOTPResponse)
 	if atResp.Status != http.StatusOK {
 		t.Errorf("%d != %d", atResp.Status, http.StatusOK)
+		t.Log(atResp.Err)
 		return
 	}
 
