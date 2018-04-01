@@ -95,6 +95,7 @@ func TestUserCreationProcess(t *testing.T) {
 
 	if vtResp.Status != http.StatusOK {
 		t.Errorf("%d != %d", vtResp.Status, http.StatusOK)
+		t.Log(vtResp.Err)
 		return
 	}
 
@@ -103,6 +104,7 @@ func TestUserCreationProcess(t *testing.T) {
 
 	if umResp.Status != http.StatusOK {
 		t.Errorf("%d != %d", umResp.Status, http.StatusOK)
+		t.Log(umResp.Err)
 		return
 	}
 
