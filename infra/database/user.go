@@ -22,7 +22,7 @@ type userRepository struct {
 }
 
 // NewUserRepository returns a new UserRepo instance.
-func NewUserRepository(rdb *sql.DB, kvs redis.Conn) repository.UserRepo {
+func NewUserRepository(rdb *sql.DB, kvs redis.Conn) repository.UserRepository {
 	return &userRepository{
 		MySQL: rdb,
 		Redis: kvs,

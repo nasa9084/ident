@@ -21,7 +21,7 @@ type Environment struct {
 }
 
 // GetUserRepository generates UserRepository instance fron env itself.
-func (env Environment) GetUserRepository() repository.UserRepo {
+func (env Environment) GetUserRepository() repository.UserRepository {
 	return database.NewUserRepository(env.RDB, env.KVS)
 }
 
