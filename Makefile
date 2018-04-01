@@ -21,3 +21,13 @@ test:
 	@mysql $(MYSQL_OPTS) -uroot $(DBNAME) < sql/ident.sql
 	@-TEST_KEYPATH=$(PWD)/key/id_ecdsa MYSQL_DB=$(DBNAME) go test -v ./...
 	@mysql $(MYSQL_OPTS) -uroot -e "DROP DATABASE $(DBNAME);"
+
+check:
+	@echo "go vet"
+	@go vet -v ./...
+	@echo "golint"
+	@go list ./... | xargs -L1 golint
+	@echo "staticcheck"
+	@staticcheck ./...
+	@echo "gosimple"
+	@gosimple ./...
