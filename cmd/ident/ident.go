@@ -6,14 +6,13 @@ import (
 
 	flags "github.com/jessevdk/go-flags"
 	"github.com/nasa9084/ident"
+	"github.com/nasa9084/ident/infra"
 )
 
 type options struct {
 	Addr           string `short:"a" long:"addr" env:"IDENT_ADDR" value-name:"ADDR" default:":8080"`
 	PrivateKeyPath string `long:"private-key-path" env:"PRIVATE_KEY_PATH" value-name:"PRIVATE_KEY_PATH" default:"key/id_ecdsa"`
-	ident.MySQLConfig
-	ident.RedisConfig
-	ident.MailConfig
+	Config         infra.Config
 }
 
 func main() { os.Exit(exec()) }
@@ -30,11 +29,7 @@ func exec() int {
 	s, err := ident.NewServer(
 		opts.Addr,
 		opts.PrivateKeyPath,
-		ident.ServerConfig{
-			opts.MySQLConfig,
-			opts.RedisConfig,
-			opts.MailConfig,
-		},
+		opts.Config,
 	)
 	if err != nil {
 		log.Print(err)
