@@ -7,6 +7,7 @@ import (
 	"github.com/nasa9084/ident/domain/entity"
 )
 
+// ExistUser returns given user exists in MySQL or not.
 func ExistUser(ctx context.Context, tx *sql.Tx, userID string) (bool, error) {
 	const query = `SELECT EXISTS (SELECT 1 FROM users WHERE user_id = ?)`
 	const exist = 1
@@ -19,6 +20,7 @@ func ExistUser(ctx context.Context, tx *sql.Tx, userID string) (bool, error) {
 	return resp == exist, nil
 }
 
+// FindUser finds by given user id from MySQL.
 func FindUser(ctx context.Context, tx *sql.Tx, userID string) (entity.User, error) {
 	const query = `SELECT user_id, password, totp_secret, email FROM users WHERE user_id = ?`
 	row := tx.QueryRowContext(ctx, query, userID)
@@ -30,6 +32,7 @@ func FindUser(ctx context.Context, tx *sql.Tx, userID string) (entity.User, erro
 	return u, nil
 }
 
+// UpdateUser updates on MySQL.
 func UpdateUser(ctx context.Context, tx *sql.Tx, u entity.User) error {
 	const query = `UPDATE users SET password=?, email=? WHERE user_id=?`
 	stmt, err := tx.PrepareContext(ctx, query)
@@ -42,6 +45,7 @@ func UpdateUser(ctx context.Context, tx *sql.Tx, u entity.User) error {
 	return nil
 }
 
+// CreateUser creates a new user into MySQL.
 func CreateUser(ctx context.Context, tx *sql.Tx, u entity.User) error {
 	const query = `INSERT INTO users(user_id, password, totp_secret, email) VALUES(?, ?, ?, ?)`
 	stmt, err := tx.PrepareContext(ctx, query)
@@ -54,6 +58,7 @@ func CreateUser(ctx context.Context, tx *sql.Tx, u entity.User) error {
 	return nil
 }
 
+// DeleteUser deletes a user from MySQL.
 func DeleteUser(ctx context.Context, tx *sql.Tx, u entity.User) error {
 	const query = `DELETE FROM users WHERE user_id = ?`
 	stmt, err := tx.PrepareContext(ctx, query)
