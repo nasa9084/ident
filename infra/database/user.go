@@ -9,6 +9,7 @@ import (
 	"github.com/nasa9084/ident/domain/entity"
 	"github.com/nasa9084/ident/domain/repository"
 	"github.com/nasa9084/ident/generator"
+	"github.com/nasa9084/ident/infra/database/mysql"
 	"github.com/nasa9084/ident/util"
 )
 
@@ -33,7 +34,11 @@ func (repo *userRepository) ExistsUser(ctx context.Context, userID string) (bool
 	if err != nil {
 		return false, err
 	}
-	existsInMySQL, err := repo.existsInMySQL(ctx, userID)
+	tx, err := repo.MySQL.BeginTx(ctx, nil)
+	if err != nil {
+		return false, err
+	}
+	existsInMySQL, err := mysql.ExistUser(ctx, tx, userID)
 	if err != nil {
 		return false, err
 	}
@@ -83,7 +88,11 @@ func (repo *userRepository) FindUserByID(ctx context.Context, userID string) (en
 	if u != nilUser {
 		return u, nil
 	}
-	return repo.findFromMySQL(ctx, userID)
+	tx, err := repo.MySQL.BeginTx(ctx, nil)
+	if err != nil {
+		return u, nil
+	}
+	return mysql.FindUser(ctx, tx, userID)
 }
 
 // UpdateUser updates user information.
@@ -95,14 +104,22 @@ func (repo *userRepository) UpdateUser(ctx context.Context, u entity.User) error
 	if inRedis {
 		return repo.updateRedis(u)
 	}
-	inMySQL, err := repo.existsInMySQL(ctx, u.ID)
+	tx, err := repo.MySQL.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	if inMySQL {
-		return repo.updateMySQL(ctx, u)
+	inMySQL, err := mysql.ExistUser(ctx, tx, u.ID)
+	if err != nil {
+		return err
 	}
-	return ErrUserNotFound
+	if !inMySQL {
+		return ErrUserNotFound
+	}
+	if err := mysql.UpdateUser(ctx, tx, u); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // Verify makes user non-temporary.
@@ -114,10 +131,17 @@ func (repo *userRepository) Verify(ctx context.Context, u entity.User) error {
 	if !exists {
 		return ErrUserNotFound
 	}
-	if err := repo.createInMySQL(ctx, u); err != nil {
+	tx, err := repo.MySQL.BeginTx(ctx, nil)
+	if err != nil {
 		return err
 	}
-	return repo.deleteFromRedis(u)
+	if err := mysql.CreateUser(ctx, tx, u); err != nil {
+		return err
+	}
+	if err := repo.deleteFromRedis(u); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // DeleteUser deletes user from Redis and MySQL.
@@ -125,7 +149,14 @@ func (repo *userRepository) DeleteUser(ctx context.Context, u entity.User) error
 	if err := repo.deleteFromRedis(u); err != nil {
 		return err
 	}
-	return repo.deleteFromMySQL(ctx, u)
+	tx, err := repo.MySQL.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if err := mysql.DeleteUser(ctx, tx, u); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (repo *userRepository) CreateSession(u entity.User) (string, error) {
