@@ -62,6 +62,12 @@ func MethodNotAllowedHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(methodnotallowedResponse, r.Method)))
 }
 
+func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		usecase.GetPublicKey(r.Context(), env).Render(w)
+	}
+}
+
 func ExistsUserHandler(env *infra.Environment) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req input.ExistsUserRequest
@@ -147,11 +153,5 @@ func AuthByPasswordHandler(env *infra.Environment) http.HandlerFunc {
 			return
 		}
 		usecase.AuthByPassword(r.Context(), req, env).Render(w)
-	}
-}
-
-func GetPublicKeyHandler(env *infra.Environment) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		usecase.GetPublicKey(r.Context(), env).Render(w)
 	}
 }

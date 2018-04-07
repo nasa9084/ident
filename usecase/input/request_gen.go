@@ -5,6 +5,8 @@ package input
 import (
 	"errors"
 	"unicode"
+
+	"github.com/nasa9084/ident/util"
 )
 
 var _ = unicode.UpperCase
@@ -23,9 +25,80 @@ type PathArgsRequest interface {
 	SetPathArgs(map[string]string)
 }
 
-type CreateUserRequest struct {
+type VerifyEmailRequest struct {
+	SessionID string `json:"-"`
+}
+
+func (r VerifyEmailRequest) Validate() error {
+	switch {
+	case r.SessionID == "":
+		return errors.New("sessid is required")
+	}
+	return nil
+}
+
+func (r *VerifyEmailRequest) SetPathArgs(args map[string]string) {
+	r.SessionID = args[`sessid`]
+}
+
+type AuthByTOTPRequest struct {
+	UserID string `json:"user_id"`
+	Token  string `json:"token"`
+}
+
+func (r AuthByTOTPRequest) Validate() error {
+	switch {
+	case r.UserID == "":
+		return errors.New("user_id is required ")
+	case r.Token == "":
+		return errors.New("token is required ")
+	case len(r.Token) != 6:
+		return errors.New("length of token is not valid")
+	case !util.IsDigit(r.Token):
+		return errors.New("token must be digit")
+	}
+	return nil
+}
+
+type AuthByPasswordRequest struct {
 	Password string `json:"password"`
+
+	SessionID string `json:"-"`
+}
+
+func (r AuthByPasswordRequest) Validate() error {
+	switch {
+	case r.SessionID == "":
+		return errors.New("authorization header is required")
+	case r.Password == "":
+		return errors.New("password is required ")
+	}
+	return nil
+}
+
+func (r *AuthByPasswordRequest) SetSessionID(sessid string) {
+	r.SessionID = sessid
+}
+
+type ExistsUserRequest struct {
+	UserID string `json:"-"`
+}
+
+func (r ExistsUserRequest) Validate() error {
+	switch {
+	case r.UserID == "":
+		return errors.New("user_id is required")
+	}
+	return nil
+}
+
+func (r *ExistsUserRequest) SetPathArgs(args map[string]string) {
+	r.UserID = args[`user_id`]
+}
+
+type CreateUserRequest struct {
 	UserID   string `json:"user_id"`
+	Password string `json:"password"`
 }
 
 func (r CreateUserRequest) Validate() error {
@@ -68,11 +141,8 @@ func (r VerifyTOTPRequest) Validate() error {
 		return errors.New("token is required ")
 	case len(r.Token) != 6:
 		return errors.New("length of token is not valid")
-	}
-	for _, r := range r.Token {
-		if !unicode.IsDigit(r) {
-			return errors.New("token must be digit")
-		}
+	case !util.IsDigit(r.Token):
+		return errors.New("token must be digit")
 	}
 	return nil
 }
@@ -99,78 +169,4 @@ func (r UpdateEmailRequest) Validate() error {
 
 func (r *UpdateEmailRequest) SetSessionID(sessid string) {
 	r.SessionID = sessid
-}
-
-type VerifyEmailRequest struct {
-	SessionID string `json:"-"`
-}
-
-func (r VerifyEmailRequest) Validate() error {
-	switch {
-	case r.SessionID == "":
-		return errors.New("sessid is required")
-	}
-	return nil
-}
-
-func (r *VerifyEmailRequest) SetPathArgs(args map[string]string) {
-	r.SessionID = args[`sessid`]
-}
-
-type AuthByTOTPRequest struct {
-	UserID string `json:"user_id"`
-	Token  string `json:"token"`
-}
-
-func (r AuthByTOTPRequest) Validate() error {
-	switch {
-	case r.UserID == "":
-		return errors.New("user_id is required ")
-	case r.Token == "":
-		return errors.New("token is required ")
-	case len(r.Token) != 6:
-		return errors.New("length of token is not valid")
-	}
-	for _, r := range r.Token {
-		if !unicode.IsDigit(r) {
-			return errors.New("token must be digit")
-		}
-	}
-	return nil
-}
-
-type AuthByPasswordRequest struct {
-	Password string `json:"password"`
-
-	SessionID string `json:"-"`
-}
-
-func (r AuthByPasswordRequest) Validate() error {
-	switch {
-	case r.SessionID == "":
-		return errors.New("authorization header is required")
-	case r.Password == "":
-		return errors.New("password is required ")
-	}
-	return nil
-}
-
-func (r *AuthByPasswordRequest) SetSessionID(sessid string) {
-	r.SessionID = sessid
-}
-
-type ExistsUserRequest struct {
-	UserID string `json:"-"`
-}
-
-func (r ExistsUserRequest) Validate() error {
-	switch {
-	case r.UserID == "":
-		return errors.New("user_id is required")
-	}
-	return nil
-}
-
-func (r *ExistsUserRequest) SetPathArgs(args map[string]string) {
-	r.UserID = args[`user_id`]
 }
