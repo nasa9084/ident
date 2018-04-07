@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/gomodule/redigo/redis"
+	redigo "github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/nasa9084/ident/domain/entity"
 	"github.com/nasa9084/ident/domain/repository"
 	"github.com/nasa9084/ident/generator"
 	"github.com/nasa9084/ident/infra/database/mysql"
+	"github.com/nasa9084/ident/infra/database/redis"
 	"github.com/nasa9084/ident/util"
 )
 
@@ -17,11 +18,11 @@ var nilUser = entity.User{}
 
 type userRepository struct {
 	MySQL *sql.DB
-	Redis redis.Conn
+	Redis redigo.Conn
 }
 
 // NewUserRepository returns a new UserRepo instance.
-func NewUserRepository(rdb *sql.DB, kvs redis.Conn) repository.UserRepository {
+func NewUserRepository(rdb *sql.DB, kvs redigo.Conn) repository.UserRepository {
 	return &userRepository{
 		MySQL: rdb,
 		Redis: kvs,
@@ -30,7 +31,7 @@ func NewUserRepository(rdb *sql.DB, kvs redis.Conn) repository.UserRepository {
 
 // ExistsUser returns whether the user id has been used or not.
 func (repo *userRepository) ExistsUser(ctx context.Context, userID string) (bool, error) {
-	existsInRedis, err := repo.existsInRedis(userID)
+	existsInRedis, err := redis.ExistUser(repo.Redis, userID)
 	if err != nil {
 		return false, err
 	}
@@ -61,7 +62,7 @@ func (repo *userRepository) CreateUser(ctx context.Context, userID, password str
 	if _, err := repo.Redis.Do("EXEC"); err != nil {
 		return "", err
 	}
-	return repo.createSession(userID)
+	return redis.CreateSession(repo.Redis, userID)
 }
 
 // FindUserBySessionID finds user using user id associated with given session id.
@@ -74,15 +75,15 @@ func (repo *userRepository) FindUserBySessionID(ctx context.Context, sessid stri
 }
 
 func (repo *userRepository) findSession(sessid string) (string, error) {
-	return redis.String(repo.Redis.Do("GET", "session:"+sessid))
+	return redigo.String(repo.Redis.Do("GET", "session:"+sessid))
 }
 
 // FindUserByID finds user using given user id.
 func (repo *userRepository) FindUserByID(ctx context.Context, userID string) (entity.User, error) {
 	var u entity.User
 	var err error
-	u, err = repo.findFromRedis(userID)
-	if err != nil && err != ErrUserNotFound {
+	u, err = redis.FindUser(repo.Redis, userID)
+	if err != nil && err != redis.ErrUserNotFound {
 		return nilUser, err
 	}
 	if u != nilUser {
@@ -97,12 +98,12 @@ func (repo *userRepository) FindUserByID(ctx context.Context, userID string) (en
 
 // UpdateUser updates user information.
 func (repo *userRepository) UpdateUser(ctx context.Context, u entity.User) error {
-	inRedis, err := repo.existsInRedis(u.ID)
+	inRedis, err := redis.ExistUser(repo.Redis, u.ID)
 	if err != nil {
 		return err
 	}
 	if inRedis {
-		return repo.updateRedis(u)
+		return redis.UpdateUser(repo.Redis, u)
 	}
 	tx, err := repo.MySQL.BeginTx(ctx, nil)
 	if err != nil {
@@ -124,7 +125,7 @@ func (repo *userRepository) UpdateUser(ctx context.Context, u entity.User) error
 
 // Verify makes user non-temporary.
 func (repo *userRepository) Verify(ctx context.Context, u entity.User) error {
-	exists, err := repo.existsInRedis(u.ID)
+	exists, err := redis.ExistUser(repo.Redis, u.ID)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func (repo *userRepository) Verify(ctx context.Context, u entity.User) error {
 	if err := mysql.CreateUser(ctx, tx, u); err != nil {
 		return err
 	}
-	if err := repo.deleteFromRedis(u); err != nil {
+	if err := redis.DeleteUser(repo.Redis, u); err != nil {
 		return err
 	}
 	return tx.Commit()
@@ -146,7 +147,7 @@ func (repo *userRepository) Verify(ctx context.Context, u entity.User) error {
 
 // DeleteUser deletes user from Redis and MySQL.
 func (repo *userRepository) DeleteUser(ctx context.Context, u entity.User) error {
-	if err := repo.deleteFromRedis(u); err != nil {
+	if err := redis.DeleteUser(repo.Redis, u); err != nil {
 		return err
 	}
 	tx, err := repo.MySQL.BeginTx(ctx, nil)
