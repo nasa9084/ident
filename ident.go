@@ -21,6 +21,13 @@ type Server struct {
 	closed chan struct{}
 }
 
+// ServerConfig is wrapper for all configurations.
+type ServerConfig struct {
+	MySQL MySQLConfig
+	Redis RedisConfig
+	Mail  MailConfig
+}
+
 // MySQLConfig holds configurations for connect to MySQL server.
 // This struct can also be used for go-flags.
 type MySQLConfig struct {
@@ -44,16 +51,16 @@ type MailConfig struct {
 }
 
 // NewServer returns a new server.
-func NewServer(addr string, privKeyPath string, mysqlCfg MySQLConfig, redisCfg RedisConfig, mailCfg MailConfig) (*Server, error) {
-	rdb, err := openMySQL(mysqlCfg)
+func NewServer(addr string, privKeyPath string, cfg ServerConfig) (*Server, error) {
+	rdb, err := openMySQL(cfg.MySQL)
 	if err != nil {
 		return nil, err
 	}
-	kvs, err := redis.Dial("tcp", redisCfg.Addr)
+	kvs, err := redis.Dial("tcp", cfg.Redis.Addr)
 	if err != nil {
 		return nil, err
 	}
-	mailer := mail.NewSendGrid(mailCfg.APIKey, mailCfg.FromAddr)
+	mailer := mail.NewSendGrid(cfg.Mail.APIKey, cfg.Mail.FromAddr)
 	key, err := infra.LoadPrivateKey(privKeyPath)
 	if err != nil {
 		return nil, err

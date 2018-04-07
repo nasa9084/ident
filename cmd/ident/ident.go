@@ -30,9 +30,11 @@ func exec() int {
 	s, err := ident.NewServer(
 		opts.Addr,
 		opts.PrivateKeyPath,
-		opts.MySQLConfig,
-		opts.RedisConfig,
-		opts.MailConfig,
+		ident.ServerConfig{
+			opts.MySQLConfig,
+			opts.RedisConfig,
+			opts.MailConfig,
+		},
 	)
 	if err != nil {
 		log.Print(err)
