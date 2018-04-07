@@ -3,6 +3,7 @@ package util
 import (
 	"crypto/sha512"
 	"encoding/hex"
+	"unicode"
 
 	"github.com/lestrrat-go/bufferpool"
 )
@@ -28,4 +29,14 @@ func Hash(password, salt string) string {
 func SHA512Digest(s string) string {
 	h := sha512.Sum512([]byte(s))
 	return hex.EncodeToString(h[:])
+}
+
+// IsDigit returns given string is all digit or not.
+func IsDigit(s string) bool {
+	for _, r := range s {
+		if !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }

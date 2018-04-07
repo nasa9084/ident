@@ -25,3 +25,22 @@ func BenchmarkHash(b *testing.B) {
 		util.Hash(password, salt)
 	}
 }
+
+func TestIsDigit(t *testing.T) {
+	candidates := []struct {
+		in       string
+		expected bool
+	}{
+		{"12345", true},
+		{"", true},
+		{"12345a", false},
+		{"123+", false},
+		{"a", false},
+	}
+	for _, c := range candidates {
+		out := util.IsDigit(c.in)
+		if out != c.expected {
+			t.Errorf("%t != %t (input: %s)", out, c.expected, c.in)
+		}
+	}
+}

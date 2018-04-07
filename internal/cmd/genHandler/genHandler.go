@@ -87,6 +87,7 @@ func generateRequests(spec *openapi.Document) error {
 	buf.WriteString("\nimport (")
 	buf.WriteString("\n\"errors\"")
 	buf.WriteString("\n\"unicode\"")
+	buf.WriteString("\n\n\"github.com/nasa9084/ident/util\"")
 	buf.WriteString("\n)")
 	buf.WriteString("\nvar _ = unicode.UpperCase")
 	if err := generateRequestInterface(&buf); err != nil {
@@ -184,7 +185,6 @@ func generateRequest(buf *bytes.Buffer, op *openapi.Operation) error {
 	buf.WriteString("\nfunc (r ")
 	buf.WriteString(op.OperationID)
 	buf.WriteString("Request) Validate() error {")
-	formatDigitMap := map[string]string{}
 	buf.WriteString("\nswitch {")
 	for n, s := range pathArgTitles {
 		buf.WriteString("\ncase r.")
@@ -254,23 +254,17 @@ func generateRequest(buf *bytes.Buffer, op *openapi.Operation) error {
 				}
 			}
 			if s.Format == "digit" {
-				formatDigitMap[p] = s.Title
+				buf.WriteString("\ncase !util.IsDigit(r.")
+				buf.WriteString(s.Title)
+				buf.WriteString("):")
+				buf.WriteString("\nreturn errors.New(")
+				buf.WriteString(strconv.Quote(fmt.Sprintf("%s must be digit", p)))
+				buf.WriteString(")")
 			}
 		}
 	}
 
 	buf.WriteString("\n}")
-	for p, t := range formatDigitMap {
-		buf.WriteString("\nfor _, r := range r.")
-		buf.WriteString(t)
-		buf.WriteString(" {")
-		buf.WriteString("\nif !unicode.IsDigit(r) {")
-		buf.WriteString("\nreturn errors.New(")
-		buf.WriteString(strconv.Quote(fmt.Sprintf("%s must be digit", p)))
-		buf.WriteString(")")
-		buf.WriteString("\n}")
-		buf.WriteString("\n}")
-	}
 	buf.WriteString("\nreturn nil")
 	buf.WriteString("\n}")
 
